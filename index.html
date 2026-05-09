@@ -533,6 +533,11 @@
       <span>⚡ 用 Edge 開啟可解鎖 50+ 種 Natural 人聲</span>
       <button onclick="openInEdge()" style="background:var(--accent);color:#000;border:none;border-radius:5px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer">用 Edge 開啟</button>
     </div>
+    <div id="ios-hint" style="display:none;padding:7px 14px;background:#1c2128;border-top:1px solid var(--border);font-size:11px;color:#aaa;line-height:1.5">
+      📱 iPhone 聲音太少？<br>
+      <strong style="color:#e2b84b">方法①</strong> 設定 → 輔助使用 → 語音內容 → 聲音 → English → 下載任一英語聲音，重新整理頁面<br>
+      <strong style="color:#e2b84b">方法②</strong> 改用 <strong>Chrome</strong> 或 <strong>Edge</strong> App 開啟本頁，有更多語音可選
+    </div>
 
     <div id="zh-section">
       <button id="zh-toggle"><span class="arrow">▶</span> 中文對照</button>
@@ -964,8 +969,12 @@ function buildVoiceSelect(voices) {
 
   const hasNatural = voices.some(v => /Natural|Neural|Enhanced/i.test(v.name));
   const isEdge = navigator.userAgent.includes('Edg/');
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
   document.getElementById('edge-hint').style.display =
-    (!hasNatural && !isEdge) ? 'flex' : 'none';
+    (!hasNatural && !isEdge && !isIOS) ? 'flex' : 'none';
+  // Show iOS tip when there are very few voices (iOS Safari default)
+  document.getElementById('ios-hint').style.display =
+    (isIOS && voices.length <= 3) ? 'block' : 'none';
 
   voiceInitDone = true;
 }
