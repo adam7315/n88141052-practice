@@ -1205,6 +1205,7 @@ function playAll(startIdx = 0) {
   document.getElementById('btn-stop').disabled = false;
 
   function playNext(idx) {
+    if (!isPlaying) return;
     if (idx >= sentences.length) {
       isPlaying = false;
       document.getElementById('btn-stop').disabled = true;
@@ -1249,13 +1250,30 @@ function markHeard(idx) {
 }
 function scrollToSentence(idx) {
   const el = document.querySelector(`.sentence[data-idx="${idx}"]`);
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  if (!el) return;
+  // Only scroll when #en-section has its own scrollbar (desktop layout).
+  // On mobile, en-section is overflow:visible and scrollIntoView would
+  // scroll the page body, pulling the user away from where they scrolled.
+  const section = document.getElementById('en-section');
+  const ov = getComputedStyle(section).overflowY;
+  if (ov === 'auto' || ov === 'scroll') {
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
 }
 function stopSpeech() {
-  window.speechSynthesis.cancel();
   isPlaying = false;
+  try { window.speechSynthesis.pause(); } catch(e) {}
+  try { window.speechSynthesis.cancel(); } catch(e) {}
   clearHighlight();
   document.getElementById('btn-stop').disabled = true;
+  // Retry cancel for stubborn browsers (iOS Safari)
+  setTimeout(() => {
+    try {
+      if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+        window.speechSynthesis.cancel();
+      }
+    } catch(e) {}
+  }, 60);
 }
 
 // Mark done
