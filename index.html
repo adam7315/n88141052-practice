@@ -517,12 +517,8 @@
       <button class="btn btn-primary" id="btn-play-all">▶ 全部播放</button>
       <button class="btn btn-stop" id="btn-stop" disabled>■ 停止</button>
       <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
-        <select class="speed-select" id="voice-select" title="選擇人聲">
-          <option value="us-female">🇺🇸 美國 — 女生</option>
-          <option value="us-male">🇺🇸 美國 — 男生</option>
-          <option value="gb-female">🇬🇧 英國 — 女生</option>
-          <option value="gb-male">🇬🇧 英國 — 男生</option>
-          <option value="tw">🇹🇼 台灣腔</option>
+        <select class="speed-select" id="voice-select" title="選擇人聲" style="min-width:160px">
+          <option value="">載入語音中…</option>
         </select>
       </div>
       <select class="speed-select" id="speed-select" title="播放速度">
@@ -853,52 +849,104 @@ function saveProgress() {
 }
 
 // 固定5種語音選項，對應系統最佳 Natural 語音
-const VOICE_MAP = {
-  'us-female': { names: ['Jenny','Aria','Ana','Michelle','Monica'],  lang: 'en-US' },
-  'us-male':   { names: ['Guy','Davis','Eric','Roger','Steffan'],    lang: 'en-US' },
-  'gb-female': { names: ['Libby','Sonia','Maisie','Abbi'],           lang: 'en-GB' },
-  'gb-male':   { names: ['Ryan','Thomas','Elliot','Oliver','Noah'],  lang: 'en-GB' },
-  'tw':        { names: ['Hanhan','HiuMaan','HsiaoChen'],            lang: 'zh-TW' },
+// 完整性別對照表（Microsoft / Google Natural voices）
+const GENDER_TABLE = {
+  // 🇺🇸 en-US Female
+  'Jenny':F='F','Aria':'F','Ana':'F','Michelle':'F','Monica':'F','Sara':'F',
+  'Nancy':'F','Amber':'F','Ashley':'F','Cora':'F','Elizabeth':'F','Emma':'F',
+  'Ava':'F','Clara':'F','Zira':'F',
+  // 🇺🇸 en-US Male
+  'Guy':'M','Davis':'M','Eric':'M','Roger':'M','Steffan':'M','Tony':'M',
+  'Andrew':'M','Brandon':'M','Brian':'M','Christopher':'M','Jacob':'M',
+  'Jason':'M','David':'M',
+  // 🇬🇧 en-GB Female
+  'Libby':'F','Sonia':'F','Maisie':'F','Abbi':'F','Abbie':'F','Bella':'F',
+  'Holly':'F','Leah':'F','Lily':'F','Nia':'F','Olivia':'F','Phoebe':'F','Sophie':'F',
+  // 🇬🇧 en-GB Male
+  'Ryan':'M','Thomas':'M','Elliot':'M','Ethan':'M','Noah':'M','Oliver':'M',
+  'George':'M','Alfie':'M','Brayden':'M','Callum':'M','Kieran':'M',
+  // 🇹🇼 zh-TW
+  'Hanhan':'F','HsiaoChen':'F','HiuMaan':'F','YunJhe':'M',
 };
+
+function voiceGender(v) {
+  // 先從名字提取第一個英文詞來查表
+  const firstName = v.name.replace(/^(Microsoft|Google)\s+/i,'').split(/\s+/)[0];
+  if (GENDER_TABLE[firstName]) return GENDER_TABLE[firstName];
+  // 退路：名字含 female/male 關鍵字
+  if (/female/i.test(v.name)) return 'F';
+  if (/male/i.test(v.name)) return 'M';
+  return null; // 不明
+}
+
+function shortVoiceName(v) {
+  return v.name
+    .replace(/^(Microsoft|Google)\s+/i,'')
+    .replace(/\s+Online\s*\(Natural\)/i,'')
+    .replace(/\s+Desktop$/i,'')
+    .replace(/\s+[-–].+$/,'');
+}
 
 function initVoice() {
   const voices = window.speechSynthesis.getVoices();
-  allEnVoices = voices; // keep reference for getSelectedVoice
+  allEnVoices = voices;
 
-  // Restore saved selection
+  const sel = document.getElementById('voice-select');
   const saved = localStorage.getItem('ppt_voice_n88141052');
-  if (saved && document.getElementById('voice-select').querySelector(`option[value="${saved}"]`)) {
-    document.getElementById('voice-select').value = saved;
+  sel.innerHTML = '';
+
+  // 分組：US女/男、GB女/男、TW，各限額
+  const groups = [
+    { key:'usF', label:'🇺🇸 美國 — 女生', lang:'en-US', gender:'F', max:12 },
+    { key:'usM', label:'🇺🇸 美國 — 男生', lang:'en-US', gender:'M', max:12 },
+    { key:'gbF', label:'🇬🇧 英國 — 女生', lang:'en-GB', gender:'F', max:6  },
+    { key:'gbM', label:'🇬🇧 英國 — 男生', lang:'en-GB', gender:'M', max:6  },
+    { key:'tw',  label:'🇹🇼 台灣腔',       lang:'zh-TW', gender:null, max:4  },
+  ];
+
+  let firstOpt = null;
+  groups.forEach(g => {
+    const list = voices
+      .filter(v => v.lang.startsWith(g.lang) && (g.gender === null || voiceGender(v) === g.gender))
+      .slice(0, g.max);
+    if (!list.length) return;
+    const grp = document.createElement('optgroup');
+    grp.label = g.label;
+    list.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v.name;
+      const natural = /Natural|Neural|Enhanced/i.test(v.name);
+      opt.textContent = (natural ? '★ ' : '') + shortVoiceName(v);
+      if (v.name === saved) opt.selected = true;
+      if (!firstOpt) firstOpt = opt;
+      grp.appendChild(opt);
+    });
+    sel.appendChild(grp);
+  });
+
+  // 預設：Jenny 或第一個
+  if (!saved || !sel.value) {
+    const jenny = voices.find(v => v.name.includes('Jenny'));
+    sel.value = jenny ? jenny.name : (firstOpt ? firstOpt.value : '');
   }
 
-  // Show Edge hint if natural voices not available
-  const hasNatural = voices.some(v => /Natural|Neural|Enhanced/.test(v.name));
+  // Edge 提示
+  const hasNatural = voices.some(v => /Natural|Neural|Enhanced/i.test(v.name));
   const isEdge = navigator.userAgent.includes('Edg/');
   document.getElementById('edge-hint').style.display =
     (!hasNatural && !isEdge) ? 'flex' : 'none';
 
-  document.getElementById('voice-select').addEventListener('change', function() {
+  sel.addEventListener('change', function() {
     localStorage.setItem('ppt_voice_n88141052', this.value);
-    const labels = {
-      'us-female':'🇺🇸 美國女生','us-male':'🇺🇸 美國男生',
-      'gb-female':'🇬🇧 英國女生','gb-male':'🇬🇧 英國男生','tw':'🇹🇼 台灣腔'
-    };
-    showToast(labels[this.value] || this.value);
+    showToast(shortVoiceName({ name: this.value }));
   });
 }
 
 function getSelectedVoice() {
-  const key = document.getElementById('voice-select').value || 'us-female';
+  const name = document.getElementById('voice-select').value;
   const voices = window.speechSynthesis.getVoices();
-  const cfg = VOICE_MAP[key];
-  if (!cfg) return voices.find(v => v.lang.startsWith('en-US')) || null;
-  // Try each preferred name in order
-  for (const name of cfg.names) {
-    const v = voices.find(v => v.name.includes(name));
-    if (v) return v;
-  }
-  // Fallback: any voice with matching lang
-  return voices.find(v => v.lang.startsWith(cfg.lang))
+  return voices.find(v => v.name === name)
+    || voices.find(v => v.name.includes('Jenny'))
     || voices.find(v => v.lang.startsWith('en-US'))
     || null;
 }
