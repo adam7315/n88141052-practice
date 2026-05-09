@@ -840,6 +840,19 @@ let utterQueue = [];
 let allEnVoices = [];
 let _stopRetryTimer = null;
 
+// Pre-built audio element (used for high-quality pre-generated MP3s)
+const audioEl = new Audio();
+audioEl.preload = 'auto';
+
+const PREBUILT = {
+  'prebuilt_christopher': { label: '🇺🇸 Christopher ♂ Neural', folder: 'christopher' },
+  'prebuilt_ryan':        { label: '🇬🇧 Ryan ♂ Neural',        folder: 'ryan' },
+  'prebuilt_william':     { label: '🇦🇺 William ♂ Neural',     folder: 'william' },
+  'prebuilt_jenny':       { label: '🇺🇸 Jenny ♀ Neural',       folder: 'jenny' },
+};
+function isPrebuilt() { return document.getElementById('voice-select').value.startsWith('prebuilt_'); }
+function prebuiltFolder() { return (PREBUILT[document.getElementById('voice-select').value] || {}).folder || 'christopher'; }
+
 // Load progress from localStorage
 function loadProgress() {
   try {
@@ -923,6 +936,21 @@ function buildVoiceSelect(voices) {
   if (voiceInitDone && prevCount > 1 && newCount <= prevCount) return;
 
   sel.innerHTML = '';
+
+  // High-quality pre-generated voices at top
+  const pbGroup = document.createElement('optgroup');
+  pbGroup.label = '★ 高品質音檔（推薦，所有裝置）';
+  Object.entries(PREBUILT).forEach(([val, info]) => {
+    const opt = document.createElement('option');
+    opt.value = val;
+    opt.textContent = info.label;
+    if (val === saved) opt.selected = true;
+    pbGroup.appendChild(opt);
+  });
+  sel.appendChild(pbGroup);
+  if (!saved || saved.startsWith('prebuilt_')) {
+    sel.value = saved || 'prebuilt_christopher';
+  }
 
   // 語言代碼 → 顯示名稱
   const LANG_LABEL = {
@@ -1190,67 +1218,68 @@ function goToSlide(idx) {
   document.getElementById('en-section').scrollTop = 0;
 }
 
+// Unified single-sentence player: uses pre-generated MP3 when available, else Web Speech API
+function playOneSentence(si, idx, onEnd, onError) {
+  const text = getSentenceText(si, idx);
+  const speed = parseFloat(document.getElementById('speed-select').value);
+  const isOrig = text === SLIDES[si].en[idx];
+
+  clearTimeout(_stopRetryTimer); _stopRetryTimer = null;
+
+  if (isPrebuilt() && isOrig) {
+    const url = `audio/${prebuiltFolder()}/${si + 1}_${idx}.mp3`;
+    audioEl.src = url;
+    audioEl.playbackRate = Math.min(Math.max(speed, 0.5), 4);
+    audioEl.onended = onEnd;
+    audioEl.onerror = onError;
+    audioEl.play().catch(onError);
+  } else {
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.rate = speed;
+    if (!isPrebuilt()) { const v = getSelectedVoice(); if (v) utter.voice = v; }
+    utter.lang = 'en-US';
+    utter.onend = onEnd;
+    utter.onerror = onError;
+    window.speechSynthesis.speak(utter);
+  }
+}
+
 // Speak single sentence
 function speakSentence(idx) {
   stopSpeech();
-  const text = getSentenceText(currentSlide, idx);
-  const speed = parseFloat(document.getElementById('speed-select').value);
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.rate = speed;
-  const v = getSelectedVoice(); if (v) utter.voice = v;
-  utter.lang = 'en-US';
-
+  const si = currentSlide;
   highlightSentence(idx);
-  utter.onend = () => {
-    markHeard(idx);
-    clearHighlight();
-    isPlaying = false;
-    document.getElementById('btn-stop').disabled = true;
-  };
-  utter.onerror = () => { clearHighlight(); isPlaying = false; };
   isPlaying = true;
   document.getElementById('btn-stop').disabled = false;
-  clearTimeout(_stopRetryTimer); _stopRetryTimer = null;
-  window.speechSynthesis.speak(utter);
+  playOneSentence(si, idx,
+    () => { markHeard(idx); clearHighlight(); isPlaying = false; document.getElementById('btn-stop').disabled = true; },
+    () => { clearHighlight(); isPlaying = false; document.getElementById('btn-stop').disabled = true; }
+  );
 }
 
 // Play all sentences
 function playAll(startIdx = 0) {
   stopSpeech();
   const si = currentSlide;
-  const sentences = SLIDES[si].en.map((_, i) => getSentenceText(si, i));
-  const speed = parseFloat(document.getElementById('speed-select').value);
+  const total = SLIDES[si].en.length;
   isPlaying = true;
   document.getElementById('btn-stop').disabled = false;
 
   function playNext(idx) {
     if (!isPlaying) return;
-    if (idx >= sentences.length) {
+    if (idx >= total) {
       isPlaying = false;
       document.getElementById('btn-stop').disabled = true;
       clearHighlight();
-      if (repeatMode) {
-        setTimeout(() => playAll(0), 800);
-      }
+      if (repeatMode) setTimeout(() => playAll(0), 800);
       return;
     }
-    const utter = new SpeechSynthesisUtterance(sentences[idx]);
-    utter.rate = speed;
-    const v = getSelectedVoice(); if (v) utter.voice = v;
-    utter.lang = 'en-US';
     highlightSentence(idx);
     scrollToSentence(idx);
-    utter.onend = () => {
-      markHeard(idx);
-      playNext(idx + 1);
-    };
-    utter.onerror = () => {
-      clearHighlight();
-      isPlaying = false;
-      document.getElementById('btn-stop').disabled = true;
-    };
-    clearTimeout(_stopRetryTimer); _stopRetryTimer = null;
-    window.speechSynthesis.speak(utter);
+    playOneSentence(si, idx,
+      () => { markHeard(idx); playNext(idx + 1); },
+      () => { clearHighlight(); isPlaying = false; document.getElementById('btn-stop').disabled = true; }
+    );
   }
   playNext(startIdx);
 }
@@ -1283,17 +1312,13 @@ function scrollToSentence(idx) {
 function stopSpeech() {
   isPlaying = false;
   clearTimeout(_stopRetryTimer);
+  try { audioEl.pause(); audioEl.currentTime = 0; audioEl.onended = null; audioEl.onerror = null; } catch(e) {}
   try { window.speechSynthesis.cancel(); } catch(e) {}
   clearHighlight();
   document.getElementById('btn-stop').disabled = true;
-  // One retry in case cancel() didn't take immediately (some desktop browsers)
   _stopRetryTimer = setTimeout(() => {
     _stopRetryTimer = null;
-    try {
-      if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
-        window.speechSynthesis.cancel();
-      }
-    } catch(e) {}
+    try { if (window.speechSynthesis.speaking || window.speechSynthesis.pending) window.speechSynthesis.cancel(); } catch(e) {}
   }, 80);
 }
 
