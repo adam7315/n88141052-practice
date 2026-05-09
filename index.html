@@ -887,27 +887,35 @@ function shortVoiceName(v) {
     .replace(/\s+[-–].+$/,'');
 }
 
-function initVoice() {
-  const voices = window.speechSynthesis.getVoices();
-  allEnVoices = voices;
+let voiceInitDone = false;
 
+function buildVoiceSelect(voices) {
+  allEnVoices = voices;
   const sel = document.getElementById('voice-select');
   const saved = localStorage.getItem('ppt_voice_n88141052');
+
+  // 如果已有選項且數量正確就不重建（避免手機多次觸發閃動）
+  const prevCount = sel.options.length;
+  const newCount = voices.filter(v =>
+    v.lang.startsWith('en-US') || v.lang.startsWith('en-GB') || v.lang.startsWith('zh-TW')
+  ).length;
+  if (voiceInitDone && prevCount > 1 && newCount <= prevCount) return;
+
   sel.innerHTML = '';
 
-  // 分組：US女/男、GB女/男、TW，各限額
   const groups = [
-    { key:'usF', label:'🇺🇸 美國 — 女生', lang:'en-US', gender:'F', max:12 },
-    { key:'usM', label:'🇺🇸 美國 — 男生', lang:'en-US', gender:'M', max:12 },
-    { key:'gbF', label:'🇬🇧 英國 — 女生', lang:'en-GB', gender:'F', max:6  },
-    { key:'gbM', label:'🇬🇧 英國 — 男生', lang:'en-GB', gender:'M', max:6  },
-    { key:'tw',  label:'🇹🇼 台灣腔',       lang:'zh-TW', gender:null, max:4  },
+    { label:'🇺🇸 美國 — 女生', lang:'en-US', gender:'F', max:12 },
+    { label:'🇺🇸 美國 — 男生', lang:'en-US', gender:'M', max:12 },
+    { label:'🇬🇧 英國 — 女生', lang:'en-GB', gender:'F', max:6  },
+    { label:'🇬🇧 英國 — 男生', lang:'en-GB', gender:'M', max:6  },
+    { label:'🇹🇼 台灣腔',       lang:'zh-TW', gender:null,max:4  },
   ];
 
   let firstOpt = null;
   groups.forEach(g => {
     const list = voices
-      .filter(v => v.lang.startsWith(g.lang) && (g.gender === null || voiceGender(v) === g.gender))
+      .filter(v => v.lang.startsWith(g.lang) &&
+        (g.gender === null || voiceGender(v) === g.gender))
       .slice(0, g.max);
     if (!list.length) return;
     const grp = document.createElement('optgroup');
@@ -915,8 +923,8 @@ function initVoice() {
     list.forEach(v => {
       const opt = document.createElement('option');
       opt.value = v.name;
-      const natural = /Natural|Neural|Enhanced/i.test(v.name);
-      opt.textContent = (natural ? '★ ' : '') + shortVoiceName(v);
+      const nat = /Natural|Neural|Enhanced/i.test(v.name);
+      opt.textContent = (nat ? '★ ' : '') + shortVoiceName(v);
       if (v.name === saved) opt.selected = true;
       if (!firstOpt) firstOpt = opt;
       grp.appendChild(opt);
@@ -924,23 +932,45 @@ function initVoice() {
     sel.appendChild(grp);
   });
 
-  // 預設：Jenny 或第一個
   if (!saved || !sel.value) {
     const jenny = voices.find(v => v.name.includes('Jenny'));
     sel.value = jenny ? jenny.name : (firstOpt ? firstOpt.value : '');
   }
 
-  // Edge 提示
   const hasNatural = voices.some(v => /Natural|Neural|Enhanced/i.test(v.name));
   const isEdge = navigator.userAgent.includes('Edg/');
   document.getElementById('edge-hint').style.display =
     (!hasNatural && !isEdge) ? 'flex' : 'none';
 
-  sel.addEventListener('change', function() {
-    localStorage.setItem('ppt_voice_n88141052', this.value);
-    showToast(shortVoiceName({ name: this.value }));
-  });
+  voiceInitDone = true;
 }
+
+function initVoice() {
+  const voices = window.speechSynthesis.getVoices();
+  if (voices.length > 0) {
+    buildVoiceSelect(voices);
+  }
+}
+
+// 手機瀏覽器（iOS/Android）常常需要多次重試才能取得語音列表
+let _retryCount = 0;
+function retryInitVoice() {
+  const voices = window.speechSynthesis.getVoices();
+  if (voices.length > 1) {
+    buildVoiceSelect(voices);
+    return;
+  }
+  if (_retryCount < 8) {
+    _retryCount++;
+    setTimeout(retryInitVoice, 300 * _retryCount); // 300ms, 600ms, 900ms…
+  }
+}
+
+// 綁定 change 事件（只需一次）
+document.getElementById('voice-select').addEventListener('change', function() {
+  localStorage.setItem('ppt_voice_n88141052', this.value);
+  showToast(shortVoiceName({ name: this.value }));
+});
 
 function getSelectedVoice() {
   const name = document.getElementById('voice-select').value;
@@ -957,6 +987,8 @@ function openInEdge() {
 
 window.speechSynthesis.onvoiceschanged = initVoice;
 initVoice();
+// 手機上 onvoiceschanged 不一定觸發，用輪詢補足
+setTimeout(retryInitVoice, 200);
 
 // Render dots
 function renderDots() {
