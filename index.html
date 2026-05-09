@@ -584,8 +584,7 @@
 const SLIDES = [
   {
     en: [
-      'Today, I will introduce "Developing an Explainable Deep Learning Module Based on the LSTM Framework for Flood Prediction."',
-      'This paper was published in Frontiers in Water in 2025.',
+      'Today, I will introduce "Developing an Explainable Deep Learning Module Based on the LSTM Framework for Flood Prediction." This paper was published in Frontiers in Water in 2025.',
       'I am Chen Chun Chia, and this is my presentation.'
     ],
     zh: [
@@ -596,12 +595,9 @@ const SLIDES = [
   },
   {
     en: [
-      'On the left are traditional hydrological models.',
-      'They are easy to understand, but they may not work well for very complex problems.',
-      'In the middle is the LSTM neural network.',
-      'It has very strong prediction ability, but people often cannot understand how it makes decisions, so it is called a "black box."',
-      'On the right is our Explainable LSTM model.',
-      'It keeps the strong prediction ability of LSTM, and also helps us understand what information the model is using.'
+      'On the left are traditional hydrological models. They are easy to understand, but they may not work well for very complex problems.',
+      'In the middle is the LSTM neural network. It has very strong prediction ability, but people often cannot understand how it makes decisions, so it is called a "black box."',
+      'On the right is our Explainable LSTM model. It keeps the strong prediction ability of LSTM, and also helps us understand what information the model is using.'
     ],
     zh: [
       '左邊是傳統水文模型。',
@@ -625,9 +621,7 @@ const SLIDES = [
       '首先，Gated Module會先篩選重要資訊。',
       '接著，Self-Attention會學習不同變數之間的關係。',
       '之後，LSTM會學習資料中的時間變化特徵，',
-      '最後由FCNN輸出最終的流量預測結果。',
-      '這個方法不僅提升了預測能力，',
-      '也讓我們更容易理解模型是如何運作的。'
+      '最後由FCNN輸出最終的流量預測結果。這個方法不僅提升了預測能力，也讓我們更容易理解模型是如何運作的。'
     ]
   },
   {
@@ -637,67 +631,47 @@ const SLIDES = [
       'The data were divided into training and testing periods to train and evaluate the prediction model.'
     ],
     zh: [
-      '我們使用美國的CAMELS資料集，',
-      '共包含531個集水區。',
-      '模型使用6種輸入變數，',
-      '包含降雨、輻射、溫度、水氣壓與流量資料。',
-      '資料也分成訓練與測試期間，',
-      '用來建立並評估預測模型。'
+      '我們使用美國的CAMELS資料集，共包含531個集水區。',
+      '模型使用6種輸入變數，包含降雨、輻射、溫度、水氣壓與流量資料。',
+      '資料也分成訓練與測試期間，用來建立並評估預測模型。'
     ]
   },
   {
     en: [
       'First, the model organizes 30 days of data from six variables into a matrix.',
-      'Next, the Gated Module keeps important information and removes less important data.',
-      'Then, Self-Attention and LSTM learn patterns from the data.',
-      'Finally, the model predicts streamflow.',
+      'Next, the Gated Module keeps important information and removes less important data. Then, Self-Attention and LSTM learn patterns from the data. Finally, the model predicts streamflow.',
       'In short, the model first learns which information is important.'
     ],
     zh: [
-      '首先，模型會把6種變數的30天資料',
-      '整理成矩陣。',
-      '接著，Gated Module保留重要資訊，',
-      '移除較不重要的資料。',
+      '首先，模型會把6種變數的30天資料整理成矩陣。',
+      '接著，Gated Module保留重要資訊，移除較不重要的資料。',
       '然後，Self-Attention與LSTM學習資料中的特徵。',
       '最後，模型產生流量預測結果。',
-      '簡單來說，',
-      '模型會先找出重要資訊再進行預測。'
+      '簡單來說，模型會先找出重要資訊再進行預測。'
     ]
   },
   {
     en: [
       'After the model finds the important information, this slide shows how it uses that information to make a prediction.',
-      'Step 1, the weighted data are sent into the LSTM.',
-      'Step 2, the FCNN layers use the LSTM output to generate the final streamflow prediction.',
-      'Step 3, we analyze the gated weights to find which days were most important.'
+      'Step 1, the weighted data are sent into the LSTM. Step 2, the FCNN layers use the LSTM output to generate the final streamflow prediction. Step 3, we analyze the gated weights to find which days were most important.'
     ],
     zh: [
-      '模型先找出重要資訊後，',
-      '這一頁接著說明模型如何利用這些資訊進行預測。',
+      '模型先找出重要資訊後，這一頁接著說明模型如何利用這些資訊進行預測。',
       '第一步，加權後的資料會送進LSTM。',
-      '第二步，FCNN layers會利用LSTM的輸出結果，',
-      '產生最後的流量預測。',
-      '第三步，我們分析gated weights，',
-      '找出模型最重視的是哪幾天。'
+      '第二步，FCNN layers會利用LSTM的輸出結果，產生最後的流量預測。',
+      '第三步，我們分析gated weights，找出模型最重視的是哪幾天。'
     ]
   },
   {
     en: [
       'The paper used three metrics: MSE, CC, and NSE.',
-      'MSE measures prediction error.',
-      'CC checks whether the changing patterns are similar.',
-      'NSE evaluates the overall prediction performance.',
+      'MSE measures prediction error. CC checks whether the changing patterns are similar. NSE evaluates the overall prediction performance.',
       'The study also compared our method with two common XAI methods: Saliency Maps and Feature Ablation.'
     ],
     zh: [
-      '這篇研究使用三種指標：',
-      'MSE、CC與NSE。',
-      'MSE用來衡量預測誤差。',
-      'CC用來檢查變化趨勢是否相似。',
-      'NSE則評估整體預測表現。',
-      '研究中也將我們的方法，',
-      '和兩種常見的XAI方法進行比較：',
-      'Saliency Maps與Feature Ablation。'
+      '這篇研究使用三種指標：MSE、CC與NSE。',
+      'MSE用來衡量預測誤差。CC用來檢查變化趨勢是否相似。NSE則評估整體預測表現。',
+      '研究中也將我們的方法，和兩種常見的XAI方法進行比較：Saliency Maps與Feature Ablation。'
     ]
   },
   {
@@ -710,16 +684,10 @@ const SLIDES = [
     ],
     zh: [
       '這一頁展示模型在不同地區的預測結果。',
-      '在MSE圖中，',
-      '部分較大的河川有較高的誤差。',
-      '在CC圖中，',
-      '大部分區域都高於0.8，',
-      '代表流量變化趨勢有被良好掌握。',
-      'NSE圖也呈現相似結果，',
-      '表示在許多不同地區，',
-      '預測結果都具有穩定性與可靠性。',
-      '整體來說，',
-      '大部分地區都有不錯的預測成果。'
+      '在MSE圖中，部分較大的河川有較高的誤差。',
+      '在CC圖中，大部分區域都高於0.8，代表流量變化趨勢有被良好掌握。',
+      'NSE圖也呈現相似結果，表示在許多不同地區，預測結果都具有穩定性與可靠性。',
+      '整體來說，大部分地區都有不錯的預測成果。'
     ]
   },
   {
@@ -727,86 +695,55 @@ const SLIDES = [
       'This slide shows how many past days the model actually uses.',
       'For streamflow, most stations mainly use the most recent 5 to 10 days.',
       'For precipitation, recent rainfall is usually the most important.',
-      'Temperature shows a different pattern.',
-      'Some western regions use more than 25 days of temperature data, possibly because of snowmelt effects.'
+      'Temperature shows a different pattern. Some western regions use more than 25 days of temperature data, possibly because of snowmelt effects.'
     ],
     zh: [
       '這一頁展示模型實際使用了多少過去的資料。',
-      '在流量部分，',
-      '大部分測站主要使用最近5到10天的資訊。',
-      '在降雨部分，',
-      '近期降雨通常最重要。',
-      '溫度則呈現不同情況。',
-      '部分美國西部地區，',
-      '會使用超過25天的溫度資料，',
-      '可能與融雪影響有關。'
+      '在流量部分，大部分測站主要使用最近5到10天的資訊。',
+      '在降雨部分，近期降雨通常最重要。',
+      '溫度則呈現不同情況。部分美國西部地區，會使用超過25天的溫度資料，可能與融雪影響有關。'
     ]
   },
   {
     en: [
-      'The study grouped the gated information into four hydrological types.',
-      'The three figures above show how the classification was done.',
+      'The study grouped the gated information into four hydrological types. The three figures above show how the classification was done.',
       'First, the study separated patterns mainly affected by precipitation or temperature.',
-      'Then, it checked whether the effect was short-term or long-term.',
-      'Finally, the study defined four different flood patterns.',
-      'The map below shows where these four types appear in different parts of the United States.'
+      'Then, it checked whether the effect was short-term or long-term. Finally, the study defined four different flood patterns. The map below shows where these four types appear in different parts of the United States.'
     ],
     zh: [
       '這項研究將門控資訊分成四種水文類型。',
       '上方三個圖表展示了分類的方式。',
-      '首先，',
-      '研究先區分主要受到降水或溫度影響的模式。',
-      '接著，',
-      '再判斷影響是短期',
-      '還是長期。',
-      '最後，',
-      '研究定義出四種不同的洪水型態。',
-      '下方地圖則展示了',
-      '這四種類型在美國不同地區的分布情況。'
+      '首先，研究先區分主要受到降水或溫度影響的模式。',
+      '接著，再判斷影響是短期還是長期。',
+      '最後，研究定義出四種不同的洪水型態。',
+      '下方地圖則展示了這四種類型在美國不同地區的分布情況。'
     ]
   },
   {
     en: [
       'Figure 6 shows four different flood patterns, including changes in precipitation and streamflow.',
       'By looking at the heatmaps, we can see which variables are important and understand what causes the streamflow changes in different regions.',
-      'The predicted streamflow is also close to the observed streamflow.',
-      'This method makes the AI black box easier to understand.'
+      'The predicted streamflow is also close to the observed streamflow. This method makes the AI black box easier to understand.'
     ],
     zh: [
-      'Figure 6展示了',
-      '四種不同的洪水型態，',
-      '包含降水與流量的變化。',
-      '透過熱圖觀察，',
-      '可以了解哪些變數較重要，',
-      '並判斷不同地區是什麼原因造成流量變化。',
-      '預測流量與實際流量',
-      '也相當接近。',
-      '這個方法也讓AI黑盒子',
-      '變得更容易理解。'
+      'Figure 6展示了四種不同的洪水型態，包含降水與流量的變化。',
+      '透過熱圖觀察，可以了解哪些變數較重要，並判斷不同地區是什麼原因造成流量變化。',
+      '預測流量與實際流量也相當接近。',
+      '這個方法也讓AI黑盒子變得更容易理解。'
     ]
   },
   {
     en: [
       'The heaviest precipitation does not always cause the biggest flood.',
-      'On the right figure, two storms in 2005 had very heavy precipitation, but the flood peaks were not very different.',
-      'However, the biggest flood happened in 2007, even though the daily precipitation was not extremely high.',
-      'The heatmap on the left helps explain why.',
-      'The results show that floods are affected not only by recent precipitation, but also by earlier temperature and moisture conditions.'
+      'On the right figure, two storms in 2005 had very heavy precipitation, but the flood peaks were not very different. However, the biggest flood happened in 2007, even though the daily precipitation was not extremely high.',
+      'The heatmap on the left helps explain why. The results show that floods are affected not only by recent precipitation, but also by earlier temperature and moisture conditions.'
     ],
     zh: [
-      '最大降水量，',
-      '不一定會造成最大洪水。',
-      '右邊的圖可以看到，',
-      '2005年兩次暴雨都有很大的降水量，',
-      '但洪峰差異並不大。',
-      '然而，',
-      '最大的洪水發生在2007年，',
-      '當時的單日降水量其實沒有特別高。',
-      '左邊的熱圖',
-      '可以幫助解釋這個現象。',
-      '結果顯示，',
-      '洪水不只受到近期降水影響，',
-      '也和前期的溫度與濕度條件有關。'
+      '最大降水量，不一定會造成最大洪水。',
+      '右邊的圖可以看到，2005年兩次暴雨都有很大的降水量，',
+      '但洪峰差異並不大。然而，最大的洪水發生在2007年，當時的單日降水量其實沒有特別高。',
+      '左邊的熱圖可以幫助解釋這個現象。',
+      '結果顯示，洪水不只受到近期降水影響，也和前期的溫度與濕度條件有關。'
     ]
   },
   {
@@ -830,15 +767,9 @@ const SLIDES = [
       'At the bottom, the curves rise near Day 30, showing that recent information has the strongest effect on flood prediction.'
     ],
     zh: [
-      '左上的熱圖可以看到，',
-      'Gated method和Saliency',
-      '有相似的變化趨勢。',
-      '右上的長條圖顯示，',
-      '所有方法都認為streamflow',
-      '是最重要的變數。',
-      '下方的曲線則可以看到，',
-      '在接近Day30時重要性上升，',
-      '代表近期資訊對洪水預測影響最大。'
+      '左上的熱圖可以看到，Gated method和Saliency 有相似的變化趨勢。',
+      '右上的長條圖顯示，所有方法都認為streamflow 是最重要的變數。',
+      '下方的曲線則可以看到，在接近Day30時重要性上升，代表近期資訊對洪水預測影響最大。'
     ]
   },
   {
@@ -848,39 +779,20 @@ const SLIDES = [
       'The results also show that AI can be used not only for prediction, but also for understanding floods.'
     ],
     zh: [
-      '總結來說，',
-      'gated method讓LSTM洪水預測',
-      '變得更容易理解。',
-      '它可以找出重要變數、',
-      '時間區段，',
-      '以及不同的洪水型態。',
-      '結果也顯示，',
-      'AI不只能做預測，',
-      '也能幫助我們理解洪水。'
+      '總結來說，gated method讓LSTM洪水預測變得更容易理解。',
+      '它可以找出重要變數、時間區段，以及不同的洪水型態。',
+      '結果也顯示，AI不只能做預測，也能幫助我們理解洪水。'
     ]
   },
   {
     en: [
       'Today, I want to share a travel story about Switzerland.',
-      'At the end of 2024, I traveled to Switzerland.',
-      'I really enjoyed the mountains and snowy scenery.',
-      'What impressed me the most was the sky.',
-      'The skies were always busy, full of planes and paragliders.',
-      'It felt like people in Switzerland ski and paraglide every day.'
+      'At the end of 2024, I traveled to Switzerland. I really enjoyed the mountains and snowy scenery.',
+      'What impressed me the most was the sky. The skies were always busy, full of planes and paragliders. It felt like people in Switzerland ski and paraglide every day.'
     ],
     zh: [
-      '今天我想分享一個',
-      '關於瑞士的旅行故事。',
-      '在2024年底，',
-      '我到瑞士旅遊。',
-      '我非常喜歡那裡的',
-      '雪山與風景。',
-      '其中讓我印象最深刻的，',
-      '是瑞士的天空。',
-      '天空總是很熱鬧，',
-      '到處都是飛機與飛行傘。',
-      '感覺瑞士人每天',
-      '都在滑雪和飛行傘。'
+      '今天我想分享一個關於瑞士的旅行故事。',
+      '在2024年底，我到瑞士旅遊。我非常喜歡那裡的雪山與風景。其中讓我印象最深刻的，是瑞士的天空。天空總是很熱鬧，到處都是飛機與飛行傘。感覺瑞士人每天都在滑雪和飛行傘。'
     ]
   }
 ];
