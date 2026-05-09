@@ -490,6 +490,8 @@
 </head>
 <body>
 
+<audio id="prebuilt-audio" preload="auto"></audio>
+
 <div id="header">
   <div id="header-top">
     <div id="slide-counter">第 <span id="cur-num">1</span> / <span id="total-num">?</span> 頁</div>
@@ -893,6 +895,12 @@ let utterQueue = [];
 let allEnVoices = [];
 let _stopRetryTimer = null;
 
+const audioEl = document.getElementById('prebuilt-audio');
+const PREBUILT = ['christopher', 'ryan', 'william', 'jenny'];
+const PREBUILT_LABEL = { christopher: 'Christopher ♂ 🇺🇸', ryan: 'Ryan ♂ 🇬🇧', william: 'William ♂ 🇦🇺', jenny: 'Jenny ♀ 🇺🇸' };
+function isPrebuilt(name) { return PREBUILT.includes((name || '').toLowerCase()); }
+function prebuiltFolder(name) { return (name || '').toLowerCase(); }
+
 
 // Load progress from localStorage
 function loadProgress() {
@@ -978,6 +986,17 @@ function buildVoiceSelect(voices) {
 
   sel.innerHTML = '';
 
+  // 預錄高品質語音 (prebuilt MP3)
+  const preGrp = document.createElement('optgroup');
+  preGrp.label = '⭐ 預錄高品質 Neural';
+  PREBUILT.forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = 'prebuilt:' + name;
+    opt.textContent = PREBUILT_LABEL[name];
+    if (saved === 'prebuilt:' + name) opt.selected = true;
+    preGrp.appendChild(opt);
+  });
+  sel.appendChild(preGrp);
 
   // 語言代碼 → 顯示名稱
   const LANG_LABEL = {
@@ -1026,8 +1045,7 @@ function buildVoiceSelect(voices) {
   });
 
   if (!saved || !sel.value) {
-    const jenny = voices.find(v => v.name.includes('Jenny'));
-    sel.value = jenny ? jenny.name : (firstOpt ? firstOpt.value : '');
+    sel.value = 'prebuilt:jenny';
   }
 
   const hasNatural = voices.some(v => /Natural|Neural|Enhanced/i.test(v.name));
@@ -1248,9 +1266,24 @@ function goToSlide(idx) {
 }
 
 function playOneSentence(si, idx, onEnd, onError) {
+  const voiceName = document.getElementById('voice-select').value;
+  clearTimeout(_stopRetryTimer); _stopRetryTimer = null;
+
+  if (isPrebuilt(voiceName.replace('prebuilt:', ''))) {
+    const folder = prebuiltFolder(voiceName.replace('prebuilt:', ''));
+    const src = `audio/${folder}/${si + 1}_${idx}.mp3`;
+    audioEl.src = src;
+    const speed = parseFloat(document.getElementById('speed-select').value);
+    audioEl.playbackRate = speed;
+    audioEl.onended = onEnd;
+    audioEl.onerror = onError;
+    audioEl.load();
+    audioEl.play().catch(onError);
+    return;
+  }
+
   const text = getSentenceText(si, idx);
   const speed = parseFloat(document.getElementById('speed-select').value);
-  clearTimeout(_stopRetryTimer); _stopRetryTimer = null;
   const utter = new SpeechSynthesisUtterance(text);
   utter.rate = speed;
   const v = getSelectedVoice();
@@ -1329,6 +1362,7 @@ function scrollToSentence(idx) {
 function stopSpeech() {
   isPlaying = false;
   clearTimeout(_stopRetryTimer);
+  try { audioEl.pause(); audioEl.src = ''; } catch(e) {}
   try { window.speechSynthesis.cancel(); } catch(e) {}
   clearHighlight();
   document.getElementById('btn-stop').disabled = true;
