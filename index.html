@@ -1023,7 +1023,8 @@ function renderDots() {
   wrap.innerHTML = '';
   for (let i = 0; i < TOTAL; i++) {
     const dot = document.createElement('div');
-    dot.className = 'dot' + (i === currentSlide ? ' current' : '') + (completed[i] ? ' done' : '');
+    const isCur = i === currentSlide;
+    dot.className = 'dot' + (isCur ? ' current' : (completed[i] ? ' done' : ''));
     dot.title = `第 ${i+1} 頁`;
     dot.innerHTML = completed[i] ? '<span></span>' : `<span>${i+1}</span>`;
     dot.addEventListener('click', () => goToSlide(i));
