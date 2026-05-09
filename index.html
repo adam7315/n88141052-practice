@@ -557,6 +557,21 @@
 
 <div id="confetti-wrap"></div>
 <div id="toast"></div>
+
+<!-- Sync QR Modal -->
+<div id="sync-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;align-items:center;justify-content:center;">
+  <div style="background:#1c2128;border:1px solid #444;border-radius:14px;padding:24px;max-width:320px;width:90%;text-align:center">
+    <div style="font-size:15px;font-weight:700;margin-bottom:4px;color:#e6edf3">☁ 同步到其他裝置</div>
+    <div style="font-size:12px;color:#aaa;margin-bottom:14px">掃描 QR Code 或複製連結，在手機開啟即自動套用</div>
+    <img id="sync-qr" src="" alt="QR Code" style="width:180px;height:180px;border-radius:8px;background:#fff;padding:6px">
+    <div style="margin-top:12px;display:flex;gap:6px">
+      <input id="sync-url-text" readonly style="flex:1;background:#0d1117;border:1px solid #444;border-radius:6px;padding:6px 8px;color:#aaa;font-size:11px;min-width:0">
+      <button id="sync-copy-btn" style="background:var(--accent);border:none;border-radius:6px;padding:6px 12px;font-weight:700;font-size:12px;cursor:pointer;color:#000;white-space:nowrap">複製</button>
+    </div>
+    <button onclick="document.getElementById('sync-modal').style.display='none'" style="margin-top:12px;width:100%;background:none;border:1px solid #444;border-radius:6px;padding:7px;color:#aaa;cursor:pointer;font-size:13px">關閉</button>
+  </div>
+</div>
+
 <div id="sel-popup">
   <span class="sel-word" id="sel-word-text"></span>
   <button class="sel-play" id="sel-play-btn">▶ 聽發音</button>
@@ -1459,9 +1474,7 @@ document.getElementById('sel-play-btn').addEventListener('click', () => {
 });
 document.getElementById('sel-close-btn').addEventListener('click', hideSelPopup);
 
-// ── Cloud Sync (jsonblob — no token needed) ───────────────────────────────────
-const BLOB_API = 'https://jsonblob.com/api/jsonBlob/019e0bb9-45be-7d86-bb97-817d4ca2eb53';
-
+// ── Sync via URL / QR Code (no external service, no token) ───────────────────
 function getAllLocalEdits() {
   const edits = {};
   for (let i = 0; i < localStorage.length; i++) {
@@ -1471,48 +1484,41 @@ function getAllLocalEdits() {
   return edits;
 }
 
-async function loadEditsFromCloud() {
+function applySyncFromHash() {
   try {
-    const res = await fetch(BLOB_API);
-    if (!res.ok) return;
-    const data = await res.json();
-    if (!data.edits) return;
+    const hash = location.hash;
+    if (!hash.startsWith('#sync=')) return;
+    const encoded = hash.slice(6);
+    const edits = JSON.parse(decodeURIComponent(escape(atob(encoded))));
     let applied = 0;
-    for (const [k, v] of Object.entries(data.edits)) {
-      if (!localStorage.getItem(k)) { localStorage.setItem(k, v); applied++; }
-    }
-    if (applied > 0) { renderSentences(); showToast('☁ 載入 ' + applied + ' 筆雲端編輯'); }
+    for (const [k, v] of Object.entries(edits)) { localStorage.setItem(k, v); applied++; }
+    history.replaceState(null, '', location.pathname);
+    if (applied > 0) { renderSentences(); showToast('✓ 套用 ' + applied + ' 筆同步編輯'); }
   } catch(e) {}
 }
 
-async function saveEditsToCloud() {
-  const btn = document.getElementById('btn-sync');
-  btn.disabled = true; btn.textContent = '☁ 同步中…';
-  try {
-    // Read current cloud edits first, then merge (local wins)
-    let cloudEdits = {};
-    const getRes = await fetch(BLOB_API);
-    if (getRes.ok) { try { cloudEdits = (await getRes.json()).edits || {}; } catch(e) {} }
-
-    const merged = Object.assign({}, cloudEdits, getAllLocalEdits());
-    const payload = { version: 1, lastUpdated: new Date().toISOString(), edits: merged };
-
-    const putRes = await fetch(BLOB_API, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    if (putRes.ok) {
-      showToast('✓ 同步完成！其他裝置重新整理即可套用');
-      btn.textContent = '✓ 已同步'; setTimeout(() => { btn.textContent = '☁ 儲存'; btn.disabled = false; }, 3000);
-      return;
-    }
-    showToast('❌ 同步失敗 ' + putRes.status);
-  } catch(e) { showToast('❌ 網路錯誤'); }
-  btn.textContent = '☁ 儲存'; btn.disabled = false;
+function showSyncModal(url) {
+  document.getElementById('sync-modal').style.display = 'flex';
+  const qrSrc = 'https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=' + encodeURIComponent(url);
+  document.getElementById('sync-qr').src = qrSrc;
+  document.getElementById('sync-url-text').value = url;
 }
 
-document.getElementById('btn-sync').addEventListener('click', saveEditsToCloud);
+function saveEditsToSync() {
+  const edits = getAllLocalEdits();
+  if (Object.keys(edits).length === 0) { showToast('尚無編輯內容'); return; }
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(edits))));
+  const url = location.origin + location.pathname + '#sync=' + encoded;
+  showSyncModal(url);
+}
+
+document.getElementById('btn-sync').addEventListener('click', saveEditsToSync);
+document.getElementById('sync-copy-btn').addEventListener('click', () => {
+  const url = document.getElementById('sync-url-text').value;
+  navigator.clipboard.writeText(url).then(() => showToast('✓ 連結已複製！')).catch(() => {
+    document.getElementById('sync-url-text').select();
+  });
+});
 
 // Init
 loadProgress();
@@ -1522,8 +1528,8 @@ updateHeader();
 updateFooter();
 document.getElementById('slide-img').src = `slides_img/slide_${currentSlide + 1}.png`;
 
-// Auto-load cloud edits on startup
-loadEditsFromCloud();
+// Apply sync edits if URL contains #sync=...
+applySyncFromHash();
 
 // Keyboard hint
 setTimeout(() => showToast('← → 換頁　Space 播放　Enter 完成'), 500);
