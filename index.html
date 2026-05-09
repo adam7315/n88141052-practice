@@ -857,29 +857,37 @@ function saveProgress() {
 // 固定5種語音選項，對應系統最佳 Natural 語音
 // 完整性別對照表（Microsoft / Google Natural voices）
 const GENDER_TABLE = {
-  // 🇺🇸 en-US Female (Microsoft Edge Natural)
+  // 🇺🇸 en-US Female (Microsoft Natural)
   'Jenny':'F','Aria':'F','Ana':'F','Michelle':'F','Monica':'F','Sara':'F',
   'Nancy':'F','Amber':'F','Ashley':'F','Cora':'F','Elizabeth':'F','Emma':'F',
-  'Ava':'F','Clara':'F','Zira':'F',
-  // 🇺🇸 en-US Male (Microsoft Edge Natural)
+  'Ava':'F','Clara':'F','Zira':'F','Jane':'F','Serena':'F','Blue':'F',
+  // 🇺🇸 en-US Male (Microsoft Natural)
   'Guy':'M','Davis':'M','Eric':'M','Roger':'M','Steffan':'M','Tony':'M',
   'Andrew':'M','Brandon':'M','Brian':'M','Christopher':'M','Jacob':'M',
-  'Jason':'M','David':'M',
+  'Jason':'M','David':'M','Adam':'M','Barry':'M','Derek':'M','Dustin':'M',
+  'Everett':'M','Liam':'M',
   // 🇬🇧 en-GB Female
   'Libby':'F','Sonia':'F','Maisie':'F','Abbi':'F','Abbie':'F','Bella':'F',
-  'Holly':'F','Leah':'F','Lily':'F','Nia':'F','Olivia':'F','Phoebe':'F','Sophie':'F',
+  'Holly':'F','Leah':'F','Lily':'F','Nia':'F','Phoebe':'F','Sophie':'F',
+  'Emily':'F','Hollie':'F','Mia':'F',
   // 🇬🇧 en-GB Male
   'Ryan':'M','Thomas':'M','Elliot':'M','Ethan':'M','Noah':'M','Oliver':'M',
   'George':'M','Alfie':'M','Brayden':'M','Callum':'M','Kieran':'M',
+  // 🇦🇺 en-AU Female
+  'Annette':'F','Beverley':'F','Darcy':'F','Freya':'F','Joanne':'F',
+  'Leonie':'F','Natasha':'F','Tina':'F','Wendy':'F',
+  // 🇦🇺 en-AU Male
+  'William':'M','Darren':'M','Luke':'M','Baxter':'M','Duncan':'M',
+  'Hamish':'M','James':'M','Lachlan':'M','Leon':'M','Neil':'M',
+  'Riley':'M','Tim':'M','Kenneth':'M','Rodney':'M',
   // 🇹🇼 zh-TW
   'Hanhan':'F','HsiaoChen':'F','HiuMaan':'F','YunJhe':'M',
   // iOS / macOS 內建語音
-  'Samantha':'F','Victoria':'F','Nicky':'F','Ava':'F','Susan':'F','Allison':'F',
+  'Samantha':'F','Victoria':'F','Nicky':'F','Susan':'F','Allison':'F',
   'Fiona':'F','Karen':'F','Moira':'F','Tessa':'F','Veena':'F',
   'Alex':'M','Fred':'M','Daniel':'M','Gordon':'M','Lee':'M','Jamie':'M',
   // Android / Chrome 語音
-  'US':'F', // Google US English (Female)
-  'UK':'M', // Google UK English (Male)
+  'US':'F','UK':'M',
 };
 
 function voiceGender(v) {
