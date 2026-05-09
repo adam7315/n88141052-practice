@@ -584,266 +584,361 @@ const SLIDES = [
     en: [
       'Today, I will introduce "Developing an Explainable Deep Learning Module Based on the LSTM Framework for Flood Prediction."',
       'This paper was published in Frontiers in Water in 2025.',
-      'My name is Chen Chun Chia.'
+      'I am Chen Chun Chia, and this is my presentation.'
     ],
     zh: [
-      '各位老師好。',
       '今天我要介紹的題目是「以LSTM架構為基礎之可解釋深度學習洪水預測模組建構」。',
-      '本研究發表於2025年的 Frontiers in Water 期刊。',
-      '我是陳俊嘉。'
+      '這篇論文發表於2025年的Frontiers in Water期刊。',
+      '我是陳俊嘉，接下來開始我的報告。'
     ]
   },
   {
     en: [
       'On the left are traditional hydrological models.',
-      'They are physically interpretable and easy to understand, but they may struggle with highly complex nonlinear problems.',
+      'They are easy to understand, but they may not work well for very complex problems.',
       'In the middle is the LSTM neural network.',
-      'It has strong prediction ability and can handle complex data, but it is often treated as a "black box."',
-      'Our study, shown on the right, combines both advantages.',
-      'The Explainable LSTM keeps the high accuracy of LSTM while also showing which time periods and variables the model focuses on.'
+      'It has very strong prediction ability, but people often cannot understand how it makes decisions, so it is called a "black box."',
+      'On the right is our Explainable LSTM model.',
+      'It keeps the strong prediction ability of LSTM, and also helps us understand what information the model is using.'
     ],
     zh: [
-      '左邊是傳統水文模型，它的優點是物理意義清楚、容易理解，但在複雜非線性問題上有時能力有限。',
-      '中間是LSTM神經網路，它的預測能力很強，可以處理複雜資料，但通常被認為是「黑盒子」，很難知道模型為什麼做出這個判斷。',
-      '而我們這個研究的重點，在右邊。',
-      '我們提出的Explainable LSTM，同時保留了LSTM的高準確度，也能直接看到模型關注哪些時間與哪些資料。'
+      '左邊是傳統水文模型。',
+      '它們容易理解，但面對很複雜的問題時，效果可能沒有那麼好。',
+      '中間是LSTM神經網路。',
+      '它的預測能力很強，但我們通常不知道它是怎麼做出判斷的，所以常被稱為「黑盒子」。',
+      '右邊則是本研究提出的Explainable LSTM模型。',
+      '它保留了LSTM強大的預測能力，同時也讓我們知道模型是根據哪些資訊來做判斷。'
     ]
   },
   {
     en: [
-      'This slide shows our proposed Gated Module framework.',
-      'The input includes 30 days of rainfall, temperature, and streamflow data.',
-      'The Gated Module selects important information, and Self-Attention learns relationships between variables.',
-      'Then, the LSTM learns temporal patterns, and the FCNN produces the final streamflow prediction.',
-      'This method improves accuracy while also making the model easier to understand.'
+      'The model uses 30 days of rainfall, temperature, and streamflow data as input.',
+      'First, the Gated Module filters important information.',
+      'Then, Self-Attention learns the relationships between different variables.',
+      'After that, the LSTM learns time patterns from the data,',
+      'and the FCNN gives the final streamflow prediction.',
+      'This method not only improves prediction performance,',
+      'but also helps us better understand how the model works.'
     ],
     zh: [
-      '這一頁是我們提出的 Gated Module 架構。',
-      '左邊是輸入資料，包括降雨、溫度與流量等30天時間序列。',
-      '接著 Gated Module 會先判斷哪些資訊重要。',
-      'Self-Attention 會分析不同變數之間的關聯。',
-      '之後 LSTM 學習時間變化與歷史記憶，最後由 FCNN 輸出流量預測結果。',
-      '這個方法不只提高準確度，也讓模型更容易被理解。'
+      '模型會使用過去30天的降雨、溫度與流量資料作為輸入。',
+      '首先，Gated Module會先篩選重要資訊。',
+      '接著，Self-Attention會學習不同變數之間的關係。',
+      '之後，LSTM會學習資料中的時間變化特徵，',
+      '最後由FCNN輸出最終的流量預測結果。',
+      '這個方法不僅提升了預測能力，',
+      '也讓我們更容易理解模型是如何運作的。'
     ]
   },
   {
     en: [
-      'We used the CAMELS dataset from the United States, including 531 catchments.',
-      'The input contains six hydro-meteorological variables, such as rainfall, temperature, and streamflow.',
-      'The data were divided into training and testing sets to build and evaluate the prediction model.'
+      'We used the CAMELS dataset from the United States, which includes 531 catchments.',
+      'The model uses six input variables,',
+      'including rainfall, radiation, temperature, vapor pressure, and streamflow.',
+      'The data were divided into training and testing periods',
+      'to train and evaluate the prediction model.'
     ],
     zh: [
-      '我們使用美國 CAMELS 資料集，共531個流域測站。',
-      '輸入包含6種水文氣象變數，例如降雨、溫度與流量。',
-      '資料分成訓練與測試兩部分，用來建立與驗證流量預測模型。'
+      '我們使用美國的CAMELS資料集，',
+      '共包含531個集水區。',
+      '模型使用6種輸入變數，',
+      '包含降雨、輻射、溫度、水氣壓與流量資料。',
+      '資料也分成訓練與測試期間，',
+      '用來建立並評估預測模型。'
     ]
   },
   {
     en: [
-      'First, the model organizes 30 days of data with six variables into a matrix.',
-      'Next, the Gated Module filters important information and reduces unnecessary noise.',
-      'Then, Self-Attention learns relationships between variables, and the LSTM captures temporal patterns.',
-      'Finally, the Prediction Module generates the streamflow prediction.',
-      'In short, instead of feeding all data directly into AI, we first help the model focus on the most important information.'
+      'First, the model organizes 30 days of data',
+      'from six variables into a matrix.',
+      'Next, the Gated Module keeps important information',
+      'and removes less important data.',
+      'Then, Self-Attention and LSTM learn patterns from the data.',
+      'Finally, the model predicts streamflow.',
+      'In short, the model first learns',
+      'which information is important.'
     ],
     zh: [
-      '首先，模型會先整理30天、6種變數的資料矩陣。',
-      '接著 Gated Module 會先篩選重要資訊，避免不重要的資料干擾模型。',
-      '之後 Self-Attention 分析不同變數之間的關聯，再交給 LSTM 學習時間變化。',
-      '最後由 Prediction Module 輸出流量預測結果。',
-      '簡單來說，我們不是直接把所有資料丟進AI，而是先幫模型找到真正重要的資訊。'
+      '首先，模型會把6種變數的30天資料',
+      '整理成矩陣。',
+      '接著，Gated Module保留重要資訊，',
+      '移除較不重要的資料。',
+      '然後，Self-Attention與LSTM學習資料中的特徵。',
+      '最後，模型產生流量預測結果。',
+      '簡單來說，',
+      '模型會先找出重要資訊再進行預測。'
     ]
   },
   {
     en: [
-      'This slide explains how the model predicts streamflow.',
-      'First, the LSTM processes 30 days of weighted input data and learns temporal patterns from historical information.',
-      'Next, the prediction module, which contains two FCNN layers, converts the hidden state into the final streamflow prediction.',
-      'Finally, we analyze the gated weights to identify the most important days used by the model.',
-      'This helps us understand not only the prediction result, but also how the AI makes its decision.'
+      'After the model finds the important information,',
+      'this slide shows how it uses that information to make a prediction.',
+      'Step 1, the weighted data are sent into the LSTM.',
+      'Step 2, the FCNN layers use the LSTM output',
+      'to generate the final streamflow prediction.',
+      'Step 3, we analyze the gated weights',
+      'to find which days were most important.'
     ],
     zh: [
-      '這一頁是在說明模型如何進行流量預測。',
-      '首先，LSTM 會處理30天的加權輸入資料，學習歷史時間序列中的變化特徵。',
-      '接著，Prediction Module 透過兩層 FCNN，將隱藏狀態轉換成最終的流量預測結果。',
-      '最後，我們分析 gated weights，找出模型最重視的關鍵日期。',
-      '這不只讓我們看到預測結果，也能進一步理解 AI 是如何做出判斷的。'
+      '模型先找出重要資訊後，',
+      '這一頁接著說明模型如何利用這些資訊進行預測。',
+      '第一步，加權後的資料會送進LSTM。',
+      '第二步，FCNN layers會利用LSTM的輸出結果，',
+      '產生最後的流量預測。',
+      '第三步，我們分析gated weights，',
+      '找出模型最重視的是哪幾天。'
     ]
   },
   {
     en: [
       'The paper used three metrics: MSE, CC, and NSE.',
       'MSE measures prediction error.',
-      'CC evaluates how well the temporal patterns match.',
-      'And NSE measures overall prediction skill.',
-      'The study also compared the proposed method with two Explainable AI benchmark methods: Saliency Maps and Feature Ablation.'
+      'CC checks whether the changing patterns are similar.',
+      'NSE evaluates the overall prediction performance.',
+      'The study also compared our method',
+      'with two common XAI methods:',
+      'Saliency Maps and Feature Ablation.'
     ],
     zh: [
-      '這一頁是在說明該研究如何評估模型表現。',
-      '研究中使用三種指標：MSE、CC 與 NSE。',
-      'MSE 用來衡量預測誤差。',
-      'CC 評估時間序列變化是否一致。',
-      'NSE 則代表整體預測能力。',
-      '另外，研究也與兩種可解釋AI方法進行比較，包括 Saliency Maps 與 Feature Ablation。'
+      '這篇研究使用三種指標：',
+      'MSE、CC與NSE。',
+      'MSE用來衡量預測誤差。',
+      'CC用來檢查變化趨勢是否相似。',
+      'NSE則評估整體預測表現。',
+      '研究中也將我們的方法，',
+      '和兩種常見的XAI方法進行比較：',
+      'Saliency Maps與Feature Ablation。'
     ]
   },
   {
     en: [
-      'This slide shows the model performance across 531 catchments in the United States.',
-      'The first map presents MSE, which measures prediction error. Larger rivers may naturally have higher errors because of larger discharge values.',
-      'The second map shows CC, which evaluates how well the model captures temporal patterns. Most western and eastern regions achieved values above 0.8.',
-      'The third map shows NSE, which measures overall prediction performance. Higher NSE values indicate better model skill.',
-      'Overall, the results show that the gated model maintains strong prediction performance while still providing interpretability.'
+      'This slide shows the prediction results',
+      'across different regions.',
+      'In the MSE map,',
+      'some larger rivers show higher errors.',
+      'In the CC map,',
+      'most regions have values above 0.8,',
+      'which means the changing patterns are captured well.',
+      'The NSE map shows a similar pattern,',
+      'which means the predictions remain reliable',
+      'in many different areas.',
+      'Overall, the results are good',
+      'in most regions.'
     ],
     zh: [
-      '這一頁展示模型在美國531個流域中的預測表現。',
-      '第一張圖是 MSE，用來衡量預測誤差。由於大型河川流量較大，因此誤差通常也會比較高。',
-      '第二張圖是 CC，用來評估模型是否能掌握流量變化的時間趨勢。大部分東西岸地區的結果都超過0.8。',
-      '第三張圖是 NSE，用來評估整體預測能力，數值越高代表模型表現越好。',
-      '整體結果顯示，這個 gated model 在維持高預測能力的同時，也保有良好的可解釋性。'
+      '這一頁展示模型在不同地區的預測結果。',
+      '在MSE圖中，',
+      '部分較大的河川有較高的誤差。',
+      '在CC圖中，',
+      '大部分區域都高於0.8，',
+      '代表流量變化趨勢有被良好掌握。',
+      'NSE圖也呈現相似結果，',
+      '表示在許多不同地區，',
+      '預測結果都具有穩定性與可靠性。',
+      '整體來說，',
+      '大部分地區都有不錯的預測成果。'
     ]
   },
   {
     en: [
-      'Following the previous performance analysis, this slide further explores how much historical information the model actually uses.',
-      'The results show that most stations mainly rely on the most recent 5 to 10 days of streamflow information.',
-      'For precipitation, the model focuses more on short-term rainfall events, indicating that recent rainfall has the strongest impact on flooding.',
-      'However, temperature shows a different pattern.',
-      'Some western U.S. regions require more than 25 days of historical temperature information, likely related to snowmelt and soil water storage.',
-      'These results suggest that different variables operate on different time scales, and the model can automatically identify the most important periods.'
+      'This slide shows how many past days',
+      'the model actually uses.',
+      'For streamflow,',
+      'most stations mainly use the most recent 5 to 10 days.',
+      'For precipitation,',
+      'recent rainfall is usually the most important.',
+      'Temperature shows a different pattern.',
+      'Some western regions use more than 25 days of temperature data,',
+      'possibly because of snowmelt effects.'
     ],
     zh: [
-      '延續上一頁的模型表現分析，這裡進一步探討模型實際依賴多少歷史資料進行預測。',
-      '結果顯示，大部分測站主要使用最近5到10天的流量資訊。',
-      '在降雨部分，模型更關注短期降雨事件，代表近期降雨對洪水影響最大。',
-      '不過在溫度變數中，部分美國西部地區需要超過25天的歷史資訊，可能與融雪及土壤含水量有關。',
-      '這表示不同變數有不同的影響時間尺度，而模型能自動辨識哪些時間資訊最重要。'
+      '這一頁展示模型實際使用了多少過去的資料。',
+      '在流量部分，',
+      '大部分測站主要使用最近5到10天的資訊。',
+      '在降雨部分，',
+      '近期降雨通常最重要。',
+      '溫度則呈現不同情況。',
+      '部分美國西部地區，',
+      '會使用超過25天的溫度資料，',
+      '可能與融雪影響有關。'
     ]
   },
   {
     en: [
-      'The study classified the gated information into four hydrological mechanism types.',
-      'The map on the bottom right shows the spatial distribution of these four types across the United States.',
-      'The three figures above explain the classification process.',
-      'Figure A separates precipitation-dominant and temperature-dominant patterns.',
-      'Figure B classifies precipitation into short-term or long-term effects.',
-      'Figure C classifies temperature into short-term or long-term effects.',
-      'By combining these patterns, the study defines four hydrological mechanism types.'
+      'The study grouped the gated information',
+      'into four hydrological types.',
+      'The three figures above show',
+      'how the classification was done.',
+      'First, the study separated patterns mainly affected by precipitation or temperature.',
+      'Then, it checked whether the effect',
+      'was short-term or long-term.',
+      'Finally, the study defined',
+      'four different flood patterns.',
+      'The map below shows where these four types',
+      'appear in different parts of the United States.'
     ],
     zh: [
-      '文章將gated information分成四種不同的水文機制類型。',
-      '右下角地圖顯示這四種類型在美國各流域中的空間分布情形。',
-      '右上方三張圖則是在說明分類方式。',
-      '圖(a)先區分降雨主導與溫度主導型態。',
-      '圖(b)再將降雨分成短期與長期影響。',
-      '圖(c)則將溫度分成短期與長期影響。',
-      '最後組合形成四種水文機制類型。'
+      '這項研究將門控資訊分成四種水文類型。',
+      '上方三個圖表展示了分類的方式。',
+      '首先，',
+      '研究先區分主要受到降水或溫度影響的模式。',
+      '接著，',
+      '再判斷影響是短期',
+      '還是長期。',
+      '最後，',
+      '研究定義出四種不同的洪水型態。',
+      '下方地圖則展示了',
+      '這四種類型在美國不同地區的分布情況。'
     ]
   },
   {
     en: [
-      'Figure 6 shows that different catchments respond to flood drivers over different time scales.',
-      'Some stations mainly react to recent rainfall, while others are influenced by long-term precipitation or temperature conditions.',
-      'These patterns demonstrate that the gated model can automatically identify different flood-generation mechanisms across regions.'
+      'Figure 6 shows',
+      'four different flood patterns,',
+      'including changes in precipitation and streamflow.',
+      'By looking at the heatmaps,',
+      'we can see which variables are important',
+      'and understand what causes the streamflow changes',
+      'in different regions.',
+      'The predicted streamflow is also close',
+      'to the observed streamflow.',
+      'This method makes the AI black box',
+      'easier to understand.'
     ],
     zh: [
-      'Figure 6顯示，不同流域對洪水驅動因子的反應時間尺度並不相同。',
-      '有些測站主要受到近期降雨影響，而有些則較受到長期降雨或溫度條件控制。',
-      '這些結果證明，gated model能自動辨識不同區域的洪水形成機制。'
+      'Figure 6展示了',
+      '四種不同的洪水型態，',
+      '包含降水與流量的變化。',
+      '透過熱圖觀察，',
+      '可以了解哪些變數較重要，',
+      '並判斷不同地區是什麼原因造成流量變化。',
+      '預測流量與實際流量',
+      '也相當接近。',
+      '這個方法也讓AI黑盒子',
+      '變得更容易理解。'
     ]
   },
   {
     en: [
-      'The heaviest rainfall does not always produce the biggest flood.',
-      'On the right figure, we can see that two storms in 2005 both exceeded 100 millimeters of rainfall, but the flood peaks were relatively similar.',
-      'However, the largest flood peak occurred in 2007, even though the daily rainfall was not extremely high.',
-      'The heatmap on the left helps explain this difference.',
-      'The model does not only focus on rainfall, but also considers long-term temperature, humidity, and soil moisture conditions from previous days.',
-      'This shows that flood generation depends on both recent rainfall and antecedent environmental conditions.'
+      'The heaviest precipitation',
+      'does not always cause the biggest flood.',
+      'On the right figure,',
+      'two storms in 2005 had very heavy precipitation,',
+      'but the flood peaks were not very different.',
+      'However,',
+      'the biggest flood happened in 2007,',
+      'even though the daily precipitation was not extremely high.',
+      'The heatmap on the left helps explain why.',
+      'The results show that',
+      'floods are affected not only by recent precipitation,',
+      'but also by earlier temperature and moisture conditions.'
     ],
     zh: [
-      '最大暴雨，不一定會造成最大洪水。',
-      '右邊圖中可以看到，2005年有兩次降雨都超過100毫米，但洪峰高度其實差異不大。',
-      '反而2007年的最大洪峰，當時的單日降雨量並沒有特別高。',
-      '左邊的熱圖則幫助我們解釋這個現象。',
-      '模型不只關注降雨本身，也同時考慮長時間的溫度、濕度以及土壤含水狀態。',
-      '這代表洪水形成不只是看當天暴雨，還受到前期環境條件影響。'
+      '最大降水量，',
+      '不一定會造成最大洪水。',
+      '右邊的圖可以看到，',
+      '2005年兩次暴雨都有很大的降水量，',
+      '但洪峰差異並不大。',
+      '然而，',
+      '最大的洪水發生在2007年，',
+      '當時的單日降水量其實沒有特別高。',
+      '左邊的熱圖',
+      '可以幫助解釋這個現象。',
+      '結果顯示，',
+      '洪水不只受到近期降水影響，',
+      '也和前期的溫度與濕度條件有關。'
     ]
   },
   {
     en: [
       'This figure tests whether the gated module really works.',
-      'In Experiment 1, the study removed radiation data because the model considered it less important.',
-      'The prediction result changed very little.',
-      'In Experiment 2, the input data was reduced from 30 days to 10 days.',
-      'The model still performed very well, showing that recent information is more important.',
-      'However, in Experiment 3, adding too much historical data actually reduced performance.'
+      'In Case 1, radiation data were removed because they were less important, but the prediction result changed very little.',
+      'In Case 2, the input data were reduced from 30 days to 10 days, and the result was still very good, showing that recent information is more important.',
+      'But in Case 3, adding too much past data actually reduced the performance.'
     ],
     zh: [
-      '這一頁是在測試gated module是不是真的有效。',
-      '在實驗1中，作者移除模型認為不重要的輻射資料。',
-      '結果預測幾乎沒有變化。',
-      '在實驗2中，作者把輸入資料從30天縮短成10天。',
-      '模型表現仍然很好，代表近期資料其實最重要。',
-      '但在實驗3中，加入太多歷史資料後，模型表現反而變差。'
+      '這張圖是在測試gated module是不是真的有效。',
+      '在案例1中，研究移除了較不重要的輻射資料，但預測結果幾乎沒有改變。',
+      '在案例2中，輸入資料從30天縮短成10天，結果仍然很好，表示近期資訊更加重要。',
+      '但在案例3中，加入太多過去資料後，反而讓模型表現變差。'
     ]
   },
   {
     en: [
-      'This figure compares three Explainable AI methods.',
-      'Saliency observes which inputs most strongly affect the prediction.',
-      'Feature Ablation removes one variable at a time to see how the result changes.',
-      'The Gated method directly learns which information is important inside the model.',
-      'Although the methods work differently, they all show that Streamflow is the most important information.'
+      'The heatmap shows that',
+      'the Gated method and Saliency',
+      'have similar patterns.',
+      'The bar chart shows that',
+      'all methods identify streamflow',
+      'as the most important variable.',
+      'At the bottom, the curves rise near Day 30,',
+      'showing that recent information',
+      'has the strongest effect on flood prediction.'
     ],
     zh: [
-      '這張圖比較三種Explainable AI方法。',
-      'Saliency是觀察哪些輸入資訊最容易影響預測結果。',
-      'Feature Ablation是一次移除一個變數，觀察結果怎麼改變。',
-      'Gated method則是在模型內部直接學習哪些資訊重要。',
-      '雖然三種方法做法不同，但都顯示Streamflow(SF)是最重要的資訊。'
+      '左上的熱圖可以看到，',
+      'Gated method和Saliency',
+      '有相似的變化趨勢。',
+      '右上的長條圖顯示，',
+      '所有方法都認為streamflow',
+      '是最重要的變數。',
+      '下方的曲線則可以看到，',
+      '在接近Day30時重要性上升，',
+      '代表近期資訊對洪水預測影響最大。'
     ]
   },
   {
     en: [
-      'This figure further compares the results of different Explainable AI methods.',
-      'The heatmap shows that the Gated method and Saliency produce very similar patterns.',
-      'The bar chart also shows that all methods identify Streamflow as the most important variable.',
-      'At the bottom, the curves rise sharply near Day 30, meaning recent information has the strongest influence on flood prediction.'
+      'In conclusion,',
+      'the gated method makes LSTM flood prediction',
+      'easier to understand.',
+      'It can identify important variables,',
+      'time periods,',
+      'and different flood patterns.',
+      'The results also show that',
+      'AI can be used not only for prediction,',
+      'but also for understanding floods.'
     ],
     zh: [
-      '這張圖進一步比較不同Explainable AI方法的結果。',
-      '左上的熱圖可以看到，Gated method與Saliency呈現非常相似的變化趨勢。',
-      '右上的長條圖也顯示，所有方法都認為Streamflow(SF)是最重要的變數。',
-      '下方曲線則可以發現，在接近Day 30時重要性快速上升，代表近期資訊對洪水預測影響最大。'
+      '總結來說，',
+      'gated method讓LSTM洪水預測',
+      '變得更容易理解。',
+      '它可以找出重要變數、',
+      '時間區段，',
+      '以及不同的洪水型態。',
+      '結果也顯示，',
+      'AI不只能做預測，',
+      '也能幫助我們理解洪水。'
     ]
   },
   {
     en: [
-      'In conclusion, this study shows that the gated method can improve the interpretability of LSTM flood prediction.',
-      'It helps identify important variables, important time windows, and different flood-generation mechanisms across regions.',
-      'Although more studies are still needed to test the model across different regions and hydrologic conditions, the results demonstrate that AI can be used not only for prediction, but also for understanding hydrologic processes.'
+      'Today, I want to share',
+      'a travel story about Switzerland.',
+      'At the end of 2024,',
+      'I traveled to Switzerland.',
+      'I really enjoyed',
+      'the mountains and snowy scenery.',
+      'What impressed me the most',
+      'was the sky.',
+      'The skies were always busy,',
+      'full of planes and paragliders.',
+      'It felt like people in Switzerland',
+      'ski and paraglide every day.'
     ],
     zh: [
-      '總結來說，本研究顯示Gated method能提升LSTM洪水預測模型的可解釋性。',
-      '它可以幫助我們找出重要變數、重要時間區間，以及不同地區的洪水形成機制。',
-      '雖然未來仍需要在更多區域與不同水文條件下進一步驗證模型，但結果證明AI不只能用來進行預測，也能幫助我們理解水文過程。'
-    ]
-  },
-  {
-    en: [
-      'At the end of 2024, I traveled to Switzerland.',
-      'I really enjoyed the beautiful mountains and snowy scenery there.',
-      'One thing that impressed me was the sky.',
-      'The skies over Switzerland are always busy — full of planes and people leaping out of them.',
-      'It feels like the Swiss never go to work; they just ski and paraglide all day.'
-    ],
-    zh: [
-      '2024年底，我到瑞士旅遊。',
-      '我非常喜歡那裡的雪山與風景。',
-      '其中讓我印象最深刻的是天空。',
-      '瑞士的天空總是很熱鬧，到處都是飛機與跳傘的人。',
-      '感覺瑞士人好像都不用上班，每天都在滑雪和飛行傘。'
+      '今天我想分享一個',
+      '關於瑞士的旅行故事。',
+      '在2024年底，',
+      '我到瑞士旅遊。',
+      '我非常喜歡那裡的',
+      '雪山與風景。',
+      '其中讓我印象最深刻的，',
+      '是瑞士的天空。',
+      '天空總是很熱鬧，',
+      '到處都是飛機與飛行傘。',
+      '感覺瑞士人每天',
+      '都在滑雪和飛行傘。'
     ]
   }
 ];
