@@ -508,7 +508,10 @@
     <div id="en-section">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <div class="en-label" style="margin-bottom:0">English Script — 點擊播放 / 雙擊編輯</div>
-        <button id="btn-reset-edits" title="重設此頁所有編輯" style="background:none;border:none;color:var(--text-muted);font-size:11px;cursor:pointer;padding:2px 6px;border-radius:4px;display:none">↩ 重設</button>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button id="btn-sync" title="同步編輯到雲端（所有裝置共用）" style="background:none;border:1px solid var(--border);color:var(--accent);font-size:11px;cursor:pointer;padding:2px 8px;border-radius:4px">☁ 儲存</button>
+          <button id="btn-reset-edits" title="重設此頁所有編輯" style="background:none;border:none;color:var(--text-muted);font-size:11px;cursor:pointer;padding:2px 6px;border-radius:4px;display:none">↩ 重設</button>
+        </div>
       </div>
       <div id="sentences-list"></div>
     </div>
@@ -1456,6 +1459,81 @@ document.getElementById('sel-play-btn').addEventListener('click', () => {
 });
 document.getElementById('sel-close-btn').addEventListener('click', hideSelPopup);
 
+// ── GitHub Sync ──────────────────────────────────────────────────────────────
+const SYNC_RAW = 'https://raw.githubusercontent.com/adam7315/n88141052-practice/main/edits.json';
+const SYNC_API = 'https://api.github.com/repos/adam7315/n88141052-practice/contents/edits.json';
+const PAT_KEY  = 'github_pat_n88141052';
+
+function getAllLocalEdits() {
+  const edits = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('ppt_edit_')) edits[k] = localStorage.getItem(k);
+  }
+  return edits;
+}
+
+async function loadEditsFromGitHub() {
+  try {
+    const res = await fetch(SYNC_RAW + '?_=' + Date.now());
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data.edits) return;
+    let applied = 0;
+    for (const [k, v] of Object.entries(data.edits)) {
+      if (!localStorage.getItem(k)) { localStorage.setItem(k, v); applied++; }
+    }
+    if (applied > 0) { renderSentences(); showToast('☁ 載入 ' + applied + ' 筆雲端編輯'); }
+  } catch(e) {}
+}
+
+async function saveEditsToGitHub() {
+  const btn = document.getElementById('btn-sync');
+  btn.disabled = true; btn.textContent = '☁ 同步中…';
+
+  let pat = localStorage.getItem(PAT_KEY);
+  if (!pat) {
+    pat = prompt('請輸入 GitHub Personal Access Token（只需輸入一次）\n\nGitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)\n→ Generate new token → 勾選 repo → 複製貼上：');
+    if (!pat) { btn.disabled = false; btn.textContent = '☁ 儲存'; return; }
+    localStorage.setItem(PAT_KEY, pat.trim()); pat = pat.trim();
+  }
+
+  // Get current SHA + existing cloud edits for merge
+  let sha = null, cloudEdits = {};
+  try {
+    const r = await fetch(SYNC_API, { headers: { Authorization: 'token ' + pat, Accept: 'application/vnd.github.v3+json' } });
+    if (r.ok) {
+      const d = await r.json(); sha = d.sha;
+      try { cloudEdits = JSON.parse(atob(d.content.replace(/\n/g,''))).edits || {}; } catch(e) {}
+    }
+  } catch(e) {}
+
+  // Merge: cloud as base, local overrides (local is the latest edits)
+  const merged = Object.assign({}, cloudEdits, getAllLocalEdits());
+  const payload = JSON.stringify({ version: 1, lastUpdated: new Date().toISOString(), edits: merged }, null, 2);
+  const body = { message: 'Sync edits from ' + navigator.platform, content: btoa(unescape(encodeURIComponent(payload))) };
+  if (sha) body.sha = sha;
+
+  try {
+    const r = await fetch(SYNC_API, {
+      method: 'PUT',
+      headers: { Authorization: 'token ' + pat, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (r.ok) {
+      showToast('✓ 同步完成！其他裝置重新整理即可套用');
+      btn.textContent = '✓ 已同步'; setTimeout(() => { btn.textContent = '☁ 儲存'; }, 3000);
+    } else if (r.status === 401) {
+      localStorage.removeItem(PAT_KEY); showToast('❌ Token 無效已清除，請重試'); btn.textContent = '☁ 儲存';
+    } else {
+      showToast('❌ 同步失敗 ' + r.status); btn.textContent = '☁ 儲存';
+    }
+  } catch(e) { showToast('❌ 網路錯誤'); btn.textContent = '☁ 儲存'; }
+  btn.disabled = false;
+}
+
+document.getElementById('btn-sync').addEventListener('click', saveEditsToGitHub);
+
 // Init
 loadProgress();
 renderDots();
@@ -1463,6 +1541,9 @@ renderSentences();
 updateHeader();
 updateFooter();
 document.getElementById('slide-img').src = `slides_img/slide_${currentSlide + 1}.png`;
+
+// Auto-load cloud edits on startup (applies GitHub edits not yet in local)
+loadEditsFromGitHub();
 
 // Keyboard hint
 setTimeout(() => showToast('← → 換頁　Space 播放　Enter 完成'), 500);
