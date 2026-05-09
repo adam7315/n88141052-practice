@@ -910,41 +910,45 @@ function buildVoiceSelect(voices) {
 
   sel.innerHTML = '';
 
-  const groups = [
-    { label:'🇺🇸 美國 — 女生', lang:'en-US', gender:'F',    max:12 },
-    { label:'🇺🇸 美國 — 男生', lang:'en-US', gender:'M',    max:12 },
-    { label:'🇬🇧 英國 — 女生', lang:'en-GB', gender:'F',    max:6  },
-    { label:'🇬🇧 英國 — 男生', lang:'en-GB', gender:'M',    max:6  },
-    { label:'🇹🇼 台灣腔',       lang:'zh-TW', gender:null,  max:4  },
-    { label:'🌐 其他英語',       lang:'en',    gender:'ALL', max:8  },
-  ];
+  // 語言代碼 → 顯示名稱
+  const LANG_LABEL = {
+    'en-US':'🇺🇸 英語 美國','en-GB':'🇬🇧 英語 英國','en-AU':'🇦🇺 英語 澳洲',
+    'en-IN':'🇮🇳 英語 印度','en-CA':'🇨🇦 英語 加拿大','en-IE':'🇮🇪 英語 愛爾蘭',
+    'en-NZ':'🇳🇿 英語 紐西蘭','en-SG':'🇸🇬 英語 新加坡','en-ZA':'🇿🇦 英語 南非',
+    'en-PH':'🇵🇭 英語 菲律賓','en-HK':'🇭🇰 英語 香港',
+    'zh-TW':'🇹🇼 中文 台灣','zh-CN':'🇨🇳 中文 中國','zh-HK':'🇭🇰 中文 香港',
+    'ja-JP':'🇯🇵 日語','ko-KR':'🇰🇷 韓語',
+    'fr-FR':'🇫🇷 法語','de-DE':'🇩🇪 德語','es-ES':'🇪🇸 西班牙語',
+    'it-IT':'🇮🇹 義大利語','pt-BR':'🇧🇷 葡萄牙語',
+  };
 
-  // 已加入的語音 name 集合，避免在「其他英語」重複
-  const usedNames = new Set();
+  // 以語言代碼分組，保留原始順序
+  const langMap = new Map();
+  voices.forEach(v => {
+    const lang = v.lang || 'other';
+    if (!langMap.has(lang)) langMap.set(lang, []);
+    langMap.get(lang).push(v);
+  });
+
+  // 排序：英語系優先，其次中文，其餘按字母
+  const sortedLangs = [...langMap.keys()].sort((a, b) => {
+    const pa = a.startsWith('en') ? 0 : a.startsWith('zh') ? 1 : 2;
+    const pb = b.startsWith('en') ? 0 : b.startsWith('zh') ? 1 : 2;
+    return pa !== pb ? pa - pb : a.localeCompare(b);
+  });
 
   let firstOpt = null;
-  groups.forEach(g => {
-    let list;
-    if (g.gender === 'ALL') {
-      // 兜底：收所有還沒出現過的英語語音
-      list = voices
-        .filter(v => v.lang.startsWith('en') && !usedNames.has(v.name))
-        .slice(0, g.max);
-    } else {
-      list = voices
-        .filter(v => v.lang.startsWith(g.lang) &&
-          (g.gender === null || voiceGender(v) === g.gender))
-        .slice(0, g.max);
-    }
-    if (!list.length) return;
+  sortedLangs.forEach(lang => {
+    const list = langMap.get(lang);
     const grp = document.createElement('optgroup');
-    grp.label = g.label;
+    grp.label = LANG_LABEL[lang] || ('🌐 ' + lang);
     list.forEach(v => {
-      usedNames.add(v.name);
       const opt = document.createElement('option');
       opt.value = v.name;
       const nat = /Natural|Neural|Enhanced/i.test(v.name);
-      opt.textContent = (nat ? '★ ' : '') + shortVoiceName(v);
+      const g = voiceGender(v);
+      const gLabel = g === 'F' ? ' ♀' : g === 'M' ? ' ♂' : '';
+      opt.textContent = (nat ? '★ ' : '') + shortVoiceName(v) + gLabel;
       if (v.name === saved) opt.selected = true;
       if (!firstOpt) firstOpt = opt;
       grp.appendChild(opt);
