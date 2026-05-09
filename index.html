@@ -582,9 +582,8 @@
 const SLIDES = [
   {
     en: [
-      'Today, I will introduce "Developing an Explainable Deep Learning Module Based on the LSTM Framework for Flood Prediction."',
-      'This paper was published in Frontiers in Water in 2025.',
-      'I am Chen Chun Chia, and this is my presentation.'
+      'Today, I will introduce a paper titled "Developing an Explainable Deep Learning Module Based on the LSTM Framework for Flood Prediction," published in Frontiers in Water in 2025.',
+      'My name is Chen Chun Chia, and this is my presentation.'
     ],
     zh: [
       '今天我要介紹的題目是「以LSTM架構為基礎之可解釋深度學習洪水預測模組建構」。',
@@ -594,12 +593,9 @@ const SLIDES = [
   },
   {
     en: [
-      'On the left are traditional hydrological models.',
-      'They are easy to understand, but they may not work well for very complex problems.',
-      'In the middle is the LSTM neural network.',
-      'It has very strong prediction ability, but people often cannot understand how it makes decisions, so it is called a "black box."',
-      'On the right is our Explainable LSTM model.',
-      'It keeps the strong prediction ability of LSTM, and also helps us understand what information the model is using.'
+      'Traditional hydrological models on the left are easy to understand, but they may struggle with highly complex problems.',
+      'LSTM neural networks in the middle have very strong prediction ability, but are often called a "black box" because we cannot understand how they make decisions.',
+      'Our Explainable LSTM model on the right keeps the strong prediction ability of LSTM, while also revealing what information the model is using to make decisions.'
     ],
     zh: [
       '左邊是傳統水文模型。',
@@ -612,11 +608,9 @@ const SLIDES = [
   },
   {
     en: [
-      'The model uses 30 days of rainfall, temperature, and streamflow data as input.',
-      'First, the Gated Module filters important information.',
-      'Then, Self-Attention learns the relationships between different variables.',
-      'After that, the LSTM learns time patterns from the data, and the FCNN gives the final streamflow prediction.',
-      'This method not only improves prediction performance, but also helps us better understand how the model works.'
+      'The model takes 30 days of rainfall, temperature, and streamflow as input.',
+      'The Gated Module first filters out less important data, then Self-Attention learns the relationships between different variables.',
+      'Finally, LSTM learns temporal patterns and FCNN produces the streamflow prediction, making the model both accurate and interpretable.'
     ],
     zh: [
       '模型會使用過去30天的降雨、溫度與流量資料作為輸入。',
@@ -630,9 +624,8 @@ const SLIDES = [
   },
   {
     en: [
-      'We used the CAMELS dataset from the United States, which includes 531 catchments.',
-      'The model uses six input variables, including rainfall, radiation, temperature, vapor pressure, and streamflow.',
-      'The data were divided into training and testing periods to train and evaluate the prediction model.'
+      'We used the CAMELS dataset from the United States, covering 531 catchments with six input variables: rainfall, radiation, temperature, vapor pressure, humidity, and streamflow.',
+      'The data were split into training and testing periods to build and evaluate the prediction model.'
     ],
     zh: [
       '我們使用美國的CAMELS資料集，',
@@ -645,11 +638,9 @@ const SLIDES = [
   },
   {
     en: [
-      'First, the model organizes 30 days of data from six variables into a matrix.',
-      'Next, the Gated Module keeps important information and removes less important data.',
-      'Then, Self-Attention and LSTM learn patterns from the data.',
-      'Finally, the model predicts streamflow.',
-      'In short, the model first learns which information is important.'
+      'The model organizes 30 days of data from six variables into a matrix, then the Gated Module filters out less important information.',
+      'Self-Attention and LSTM then learn patterns from the filtered data.',
+      'Finally, the Prediction Module outputs the streamflow result — in short, the model learns which information matters before making predictions.'
     ],
     zh: [
       '首先，模型會把6種變數的30天資料',
@@ -664,10 +655,9 @@ const SLIDES = [
   },
   {
     en: [
-      'After the model finds the important information, this slide shows how it uses that information to make a prediction.',
-      'Step 1, the weighted data are sent into the LSTM.',
-      'Step 2, the FCNN layers use the LSTM output to generate the final streamflow prediction.',
-      'Step 3, we analyze the gated weights to find which days were most important.'
+      'After finding important information, the model follows three steps to make a prediction.',
+      'Step 1: weighted data are sent into the LSTM; Step 2: FCNN layers use the LSTM output to generate the final streamflow prediction.',
+      'Step 3: we analyze the gated weights to identify which days the model considered most important.'
     ],
     zh: [
       '模型先找出重要資訊後，',
@@ -681,11 +671,8 @@ const SLIDES = [
   },
   {
     en: [
-      'The paper used three metrics: MSE, CC, and NSE.',
-      'MSE measures prediction error.',
-      'CC checks whether the changing patterns are similar.',
-      'NSE evaluates the overall prediction performance.',
-      'The study also compared our method with two common XAI methods: Saliency Maps and Feature Ablation.'
+      'The study evaluated model performance using three metrics: MSE for prediction error, CC for pattern similarity, and NSE for overall prediction skill.',
+      'The proposed method was also compared with two common XAI benchmarks: Saliency Maps and Feature Ablation.'
     ],
     zh: [
       '這篇研究使用三種指標：',
@@ -700,11 +687,9 @@ const SLIDES = [
   },
   {
     en: [
-      'This slide shows the prediction results across different regions.',
-      'In the MSE map, some larger rivers show higher errors.',
-      'In the CC map, most regions have values above 0.8, which means the changing patterns are captured well.',
-      'The NSE map shows a similar pattern, which means the predictions remain reliable in many different areas.',
-      'Overall, the results are good in most regions.'
+      'This slide presents the prediction results across 531 U.S. catchments, shown in three maps for MSE, CC, and NSE.',
+      'In the MSE map, some larger rivers show higher errors due to their greater discharge values; in the CC map, most regions score above 0.8, meaning flow patterns are well captured.',
+      'The NSE map confirms strong overall performance, showing that the model delivers reliable predictions across most regions.'
     ],
     zh: [
       '這一頁展示模型在不同地區的預測結果。',
@@ -722,11 +707,9 @@ const SLIDES = [
   },
   {
     en: [
-      'This slide shows how many past days the model actually uses.',
-      'For streamflow, most stations mainly use the most recent 5 to 10 days.',
-      'For precipitation, recent rainfall is usually the most important.',
-      'Temperature shows a different pattern.',
-      'Some western regions use more than 25 days of temperature data, possibly because of snowmelt effects.'
+      'This slide examines how many days of historical data the model actually relies on.',
+      'For streamflow and precipitation, most stations mainly use the most recent 5 to 10 days, since recent data has the strongest impact.',
+      'Temperature shows a different pattern — some western regions use more than 25 days, likely because of snowmelt and long-term moisture effects.'
     ],
     zh: [
       '這一頁展示模型實際使用了多少過去的資料。',
@@ -742,12 +725,9 @@ const SLIDES = [
   },
   {
     en: [
-      'The study grouped the gated information into four hydrological types.',
-      'The three figures above show how the classification was done.',
-      'First, the study separated patterns mainly affected by precipitation or temperature.',
-      'Then, it checked whether the effect was short-term or long-term.',
-      'Finally, the study defined four different flood patterns.',
-      'The map below shows where these four types appear in different parts of the United States.'
+      'The study classified the gated information into four hydrological mechanism types based on the dominant driver and time scale.',
+      'As shown in the three figures above, patterns were first separated into precipitation-dominant or temperature-dominant, then further divided into short-term or long-term effects.',
+      'This produced four distinct flood patterns, whose spatial distribution across the United States is shown in the map below.'
     ],
     zh: [
       '這項研究將門控資訊分成四種水文類型。',
@@ -765,10 +745,9 @@ const SLIDES = [
   },
   {
     en: [
-      'Figure 6 shows four different flood patterns, including changes in precipitation and streamflow.',
-      'By looking at the heatmaps, we can see which variables are important and understand what causes the streamflow changes in different regions.',
-      'The predicted streamflow is also close to the observed streamflow.',
-      'This method makes the AI black box easier to understand.'
+      'Figure 6 illustrates four distinct flood patterns by showing heatmaps of precipitation and streamflow for representative stations in each type.',
+      'The heatmaps reveal which variables drive streamflow changes in different regions, and the predicted values closely match the observed streamflow.',
+      'This approach transforms the AI black box into something interpretable, giving us insight into the physical mechanisms behind each flood type.'
     ],
     zh: [
       'Figure 6展示了',
@@ -785,11 +764,9 @@ const SLIDES = [
   },
   {
     en: [
-      'The heaviest precipitation does not always cause the biggest flood.',
-      'On the right figure, two storms in 2005 had very heavy precipitation, but the flood peaks were not very different.',
-      'However, the biggest flood happened in 2007, even though the daily precipitation was not extremely high.',
-      'The heatmap on the left helps explain why.',
-      'The results show that floods are affected not only by recent precipitation, but also by earlier temperature and moisture conditions.'
+      'The heaviest rainfall does not always cause the biggest flood — two large storms in 2005 produced similar peaks, while the biggest flood occurred in 2007 with relatively low daily rainfall.',
+      'The heatmap on the left explains why: the model considers not only recent precipitation, but also prior temperature and soil moisture conditions.',
+      'This demonstrates that flood generation depends on both current rainfall and antecedent environmental conditions.'
     ],
     zh: [
       '最大降水量，',
@@ -809,10 +786,9 @@ const SLIDES = [
   },
   {
     en: [
-      'This figure tests whether the gated module really works.',
-      'In Case 1, radiation data were removed because they were less important, but the prediction result changed very little.',
-      'In Case 2, the input data were reduced from 30 days to 10 days, and the result was still very good, showing that recent information is more important.',
-      'But in Case 3, adding too much past data actually reduced the performance.'
+      'This figure tests whether the Gated Module actually works through three ablation experiments.',
+      'In Case 1, removing low-importance radiation data barely changed the prediction; in Case 2, reducing input from 30 to 10 days still gave strong results, confirming that recent data matters most.',
+      'However, in Case 3, adding too much historical data actually hurt performance, showing that irrelevant information can be harmful.'
     ],
     zh: [
       '這張圖是在測試gated module是不是真的有效。',
@@ -823,9 +799,9 @@ const SLIDES = [
   },
   {
     en: [
-      'The heatmap shows that the Gated method and Saliency have similar patterns.',
-      'The bar chart shows that all methods identify streamflow as the most important variable.',
-      'At the bottom, the curves rise near Day 30, showing that recent information has the strongest effect on flood prediction.'
+      'The heatmap shows that the Gated method and Saliency Maps produce very similar importance patterns, validating that the Gated method captures genuine signals.',
+      'The bar chart confirms that all XAI methods agree: streamflow is the most important variable.',
+      'The curves at the bottom rise sharply near Day 30, showing that the most recent data has the strongest influence on flood prediction.'
     ],
     zh: [
       '左上的熱圖可以看到，',
@@ -841,9 +817,9 @@ const SLIDES = [
   },
   {
     en: [
-      'In conclusion, the gated method makes LSTM flood prediction easier to understand.',
-      'It can identify important variables, time periods, and different flood patterns.',
-      'The results also show that AI can be used not only for prediction, but also for understanding floods.'
+      'In conclusion, the Gated LSTM method improves flood prediction interpretability by identifying which variables, time windows, and regional mechanisms drive flood generation.',
+      'The results show that AI can go beyond prediction — it can help us physically understand hydrological processes.',
+      'Future work should validate the model across more diverse regions and hydrological conditions.'
     ],
     zh: [
       '總結來說，',
@@ -859,12 +835,9 @@ const SLIDES = [
   },
   {
     en: [
-      'Today, I want to share a travel story about Switzerland.',
-      'At the end of 2024, I traveled to Switzerland.',
-      'I really enjoyed the mountains and snowy scenery.',
-      'What impressed me the most was the sky.',
-      'The skies were always busy, full of planes and paragliders.',
-      'It felt like people in Switzerland ski and paraglide every day.'
+      'To close, I want to share a quick travel story — at the end of 2024, I visited Switzerland and was amazed by the mountains and snowy scenery.',
+      'But what impressed me most was the sky: it was always full of planes and paragliders.',
+      'It honestly felt like people in Switzerland never go to work — they just ski and paraglide all day.'
     ],
     zh: [
       '今天我想分享一個',
@@ -893,18 +866,6 @@ let utterQueue = [];
 let allEnVoices = [];
 let _stopRetryTimer = null;
 
-// Pre-built audio element (used for high-quality pre-generated MP3s)
-const audioEl = new Audio();
-audioEl.preload = 'auto';
-
-const PREBUILT = {
-  'prebuilt_christopher': { label: '🇺🇸 Christopher ♂ Neural', folder: 'christopher' },
-  'prebuilt_ryan':        { label: '🇬🇧 Ryan ♂ Neural',        folder: 'ryan' },
-  'prebuilt_william':     { label: '🇦🇺 William ♂ Neural',     folder: 'william' },
-  'prebuilt_jenny':       { label: '🇺🇸 Jenny ♀ Neural',       folder: 'jenny' },
-};
-function isPrebuilt() { return document.getElementById('voice-select').value.startsWith('prebuilt_'); }
-function prebuiltFolder() { return (PREBUILT[document.getElementById('voice-select').value] || {}).folder || 'christopher'; }
 
 // Load progress from localStorage
 function loadProgress() {
@@ -990,20 +951,6 @@ function buildVoiceSelect(voices) {
 
   sel.innerHTML = '';
 
-  // High-quality pre-generated voices at top
-  const pbGroup = document.createElement('optgroup');
-  pbGroup.label = '★ 高品質音檔（推薦，所有裝置）';
-  Object.entries(PREBUILT).forEach(([val, info]) => {
-    const opt = document.createElement('option');
-    opt.value = val;
-    opt.textContent = info.label;
-    if (val === saved) opt.selected = true;
-    pbGroup.appendChild(opt);
-  });
-  sel.appendChild(pbGroup);
-  if (!saved || saved.startsWith('prebuilt_')) {
-    sel.value = saved || 'prebuilt_christopher';
-  }
 
   // 語言代碼 → 顯示名稱
   const LANG_LABEL = {
@@ -1273,30 +1220,18 @@ function goToSlide(idx) {
   document.getElementById('en-section').scrollTop = 0;
 }
 
-// Unified single-sentence player: uses pre-generated MP3 when available, else Web Speech API
 function playOneSentence(si, idx, onEnd, onError) {
   const text = getSentenceText(si, idx);
   const speed = parseFloat(document.getElementById('speed-select').value);
-  const isOrig = text === SLIDES[si].en[idx];
-
   clearTimeout(_stopRetryTimer); _stopRetryTimer = null;
-
-  if (isPrebuilt() && isOrig) {
-    const url = `audio/${prebuiltFolder()}/${si + 1}_${idx}.mp3`;
-    audioEl.src = url;
-    audioEl.playbackRate = Math.min(Math.max(speed, 0.5), 4);
-    audioEl.onended = onEnd;
-    audioEl.onerror = onError;
-    audioEl.play().catch(onError);
-  } else {
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.rate = speed;
-    if (!isPrebuilt()) { const v = getSelectedVoice(); if (v) utter.voice = v; }
-    utter.lang = 'en-US';
-    utter.onend = onEnd;
-    utter.onerror = onError;
-    window.speechSynthesis.speak(utter);
-  }
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = speed;
+  const v = getSelectedVoice();
+  if (v) utter.voice = v;
+  utter.lang = 'en-US';
+  utter.onend = onEnd;
+  utter.onerror = onError;
+  window.speechSynthesis.speak(utter);
 }
 
 // Speak single sentence
@@ -1367,7 +1302,6 @@ function scrollToSentence(idx) {
 function stopSpeech() {
   isPlaying = false;
   clearTimeout(_stopRetryTimer);
-  try { audioEl.pause(); audioEl.currentTime = 0; audioEl.onended = null; audioEl.onerror = null; } catch(e) {}
   try { window.speechSynthesis.cancel(); } catch(e) {}
   clearHighlight();
   document.getElementById('btn-stop').disabled = true;
