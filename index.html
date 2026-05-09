@@ -615,10 +615,8 @@ const SLIDES = [
       'The model uses 30 days of rainfall, temperature, and streamflow data as input.',
       'First, the Gated Module filters important information.',
       'Then, Self-Attention learns the relationships between different variables.',
-      'After that, the LSTM learns time patterns from the data,',
-      'and the FCNN gives the final streamflow prediction.',
-      'This method not only improves prediction performance,',
-      'but also helps us better understand how the model works.'
+      'After that, the LSTM learns time patterns from the data, and the FCNN gives the final streamflow prediction.',
+      'This method not only improves prediction performance, but also helps us better understand how the model works.'
     ],
     zh: [
       '模型會使用過去30天的降雨、溫度與流量資料作為輸入。',
@@ -633,10 +631,8 @@ const SLIDES = [
   {
     en: [
       'We used the CAMELS dataset from the United States, which includes 531 catchments.',
-      'The model uses six input variables,',
-      'including rainfall, radiation, temperature, vapor pressure, and streamflow.',
-      'The data were divided into training and testing periods',
-      'to train and evaluate the prediction model.'
+      'The model uses six input variables, including rainfall, radiation, temperature, vapor pressure, and streamflow.',
+      'The data were divided into training and testing periods to train and evaluate the prediction model.'
     ],
     zh: [
       '我們使用美國的CAMELS資料集，',
@@ -649,14 +645,11 @@ const SLIDES = [
   },
   {
     en: [
-      'First, the model organizes 30 days of data',
-      'from six variables into a matrix.',
-      'Next, the Gated Module keeps important information',
-      'and removes less important data.',
+      'First, the model organizes 30 days of data from six variables into a matrix.',
+      'Next, the Gated Module keeps important information and removes less important data.',
       'Then, Self-Attention and LSTM learn patterns from the data.',
       'Finally, the model predicts streamflow.',
-      'In short, the model first learns',
-      'which information is important.'
+      'In short, the model first learns which information is important.'
     ],
     zh: [
       '首先，模型會把6種變數的30天資料',
@@ -671,13 +664,10 @@ const SLIDES = [
   },
   {
     en: [
-      'After the model finds the important information,',
-      'this slide shows how it uses that information to make a prediction.',
+      'After the model finds the important information, this slide shows how it uses that information to make a prediction.',
       'Step 1, the weighted data are sent into the LSTM.',
-      'Step 2, the FCNN layers use the LSTM output',
-      'to generate the final streamflow prediction.',
-      'Step 3, we analyze the gated weights',
-      'to find which days were most important.'
+      'Step 2, the FCNN layers use the LSTM output to generate the final streamflow prediction.',
+      'Step 3, we analyze the gated weights to find which days were most important.'
     ],
     zh: [
       '模型先找出重要資訊後，',
@@ -695,9 +685,7 @@ const SLIDES = [
       'MSE measures prediction error.',
       'CC checks whether the changing patterns are similar.',
       'NSE evaluates the overall prediction performance.',
-      'The study also compared our method',
-      'with two common XAI methods:',
-      'Saliency Maps and Feature Ablation.'
+      'The study also compared our method with two common XAI methods: Saliency Maps and Feature Ablation.'
     ],
     zh: [
       '這篇研究使用三種指標：',
@@ -712,18 +700,11 @@ const SLIDES = [
   },
   {
     en: [
-      'This slide shows the prediction results',
-      'across different regions.',
-      'In the MSE map,',
-      'some larger rivers show higher errors.',
-      'In the CC map,',
-      'most regions have values above 0.8,',
-      'which means the changing patterns are captured well.',
-      'The NSE map shows a similar pattern,',
-      'which means the predictions remain reliable',
-      'in many different areas.',
-      'Overall, the results are good',
-      'in most regions.'
+      'This slide shows the prediction results across different regions.',
+      'In the MSE map, some larger rivers show higher errors.',
+      'In the CC map, most regions have values above 0.8, which means the changing patterns are captured well.',
+      'The NSE map shows a similar pattern, which means the predictions remain reliable in many different areas.',
+      'Overall, the results are good in most regions.'
     ],
     zh: [
       '這一頁展示模型在不同地區的預測結果。',
@@ -741,15 +722,11 @@ const SLIDES = [
   },
   {
     en: [
-      'This slide shows how many past days',
-      'the model actually uses.',
-      'For streamflow,',
-      'most stations mainly use the most recent 5 to 10 days.',
-      'For precipitation,',
-      'recent rainfall is usually the most important.',
+      'This slide shows how many past days the model actually uses.',
+      'For streamflow, most stations mainly use the most recent 5 to 10 days.',
+      'For precipitation, recent rainfall is usually the most important.',
       'Temperature shows a different pattern.',
-      'Some western regions use more than 25 days of temperature data,',
-      'possibly because of snowmelt effects.'
+      'Some western regions use more than 25 days of temperature data, possibly because of snowmelt effects.'
     ],
     zh: [
       '這一頁展示模型實際使用了多少過去的資料。',
@@ -765,17 +742,12 @@ const SLIDES = [
   },
   {
     en: [
-      'The study grouped the gated information',
-      'into four hydrological types.',
-      'The three figures above show',
-      'how the classification was done.',
+      'The study grouped the gated information into four hydrological types.',
+      'The three figures above show how the classification was done.',
       'First, the study separated patterns mainly affected by precipitation or temperature.',
-      'Then, it checked whether the effect',
-      'was short-term or long-term.',
-      'Finally, the study defined',
-      'four different flood patterns.',
-      'The map below shows where these four types',
-      'appear in different parts of the United States.'
+      'Then, it checked whether the effect was short-term or long-term.',
+      'Finally, the study defined four different flood patterns.',
+      'The map below shows where these four types appear in different parts of the United States.'
     ],
     zh: [
       '這項研究將門控資訊分成四種水文類型。',
@@ -793,17 +765,10 @@ const SLIDES = [
   },
   {
     en: [
-      'Figure 6 shows',
-      'four different flood patterns,',
-      'including changes in precipitation and streamflow.',
-      'By looking at the heatmaps,',
-      'we can see which variables are important',
-      'and understand what causes the streamflow changes',
-      'in different regions.',
-      'The predicted streamflow is also close',
-      'to the observed streamflow.',
-      'This method makes the AI black box',
-      'easier to understand.'
+      'Figure 6 shows four different flood patterns, including changes in precipitation and streamflow.',
+      'By looking at the heatmaps, we can see which variables are important and understand what causes the streamflow changes in different regions.',
+      'The predicted streamflow is also close to the observed streamflow.',
+      'This method makes the AI black box easier to understand.'
     ],
     zh: [
       'Figure 6展示了',
@@ -820,18 +785,11 @@ const SLIDES = [
   },
   {
     en: [
-      'The heaviest precipitation',
-      'does not always cause the biggest flood.',
-      'On the right figure,',
-      'two storms in 2005 had very heavy precipitation,',
-      'but the flood peaks were not very different.',
-      'However,',
-      'the biggest flood happened in 2007,',
-      'even though the daily precipitation was not extremely high.',
+      'The heaviest precipitation does not always cause the biggest flood.',
+      'On the right figure, two storms in 2005 had very heavy precipitation, but the flood peaks were not very different.',
+      'However, the biggest flood happened in 2007, even though the daily precipitation was not extremely high.',
       'The heatmap on the left helps explain why.',
-      'The results show that',
-      'floods are affected not only by recent precipitation,',
-      'but also by earlier temperature and moisture conditions.'
+      'The results show that floods are affected not only by recent precipitation, but also by earlier temperature and moisture conditions.'
     ],
     zh: [
       '最大降水量，',
@@ -865,15 +823,9 @@ const SLIDES = [
   },
   {
     en: [
-      'The heatmap shows that',
-      'the Gated method and Saliency',
-      'have similar patterns.',
-      'The bar chart shows that',
-      'all methods identify streamflow',
-      'as the most important variable.',
-      'At the bottom, the curves rise near Day 30,',
-      'showing that recent information',
-      'has the strongest effect on flood prediction.'
+      'The heatmap shows that the Gated method and Saliency have similar patterns.',
+      'The bar chart shows that all methods identify streamflow as the most important variable.',
+      'At the bottom, the curves rise near Day 30, showing that recent information has the strongest effect on flood prediction.'
     ],
     zh: [
       '左上的熱圖可以看到，',
@@ -889,15 +841,9 @@ const SLIDES = [
   },
   {
     en: [
-      'In conclusion,',
-      'the gated method makes LSTM flood prediction',
-      'easier to understand.',
-      'It can identify important variables,',
-      'time periods,',
-      'and different flood patterns.',
-      'The results also show that',
-      'AI can be used not only for prediction,',
-      'but also for understanding floods.'
+      'In conclusion, the gated method makes LSTM flood prediction easier to understand.',
+      'It can identify important variables, time periods, and different flood patterns.',
+      'The results also show that AI can be used not only for prediction, but also for understanding floods.'
     ],
     zh: [
       '總結來說，',
@@ -913,18 +859,12 @@ const SLIDES = [
   },
   {
     en: [
-      'Today, I want to share',
-      'a travel story about Switzerland.',
-      'At the end of 2024,',
-      'I traveled to Switzerland.',
-      'I really enjoyed',
-      'the mountains and snowy scenery.',
-      'What impressed me the most',
-      'was the sky.',
-      'The skies were always busy,',
-      'full of planes and paragliders.',
-      'It felt like people in Switzerland',
-      'ski and paraglide every day.'
+      'Today, I want to share a travel story about Switzerland.',
+      'At the end of 2024, I traveled to Switzerland.',
+      'I really enjoyed the mountains and snowy scenery.',
+      'What impressed me the most was the sky.',
+      'The skies were always busy, full of planes and paragliders.',
+      'It felt like people in Switzerland ski and paraglide every day.'
     ],
     zh: [
       '今天我想分享一個',
