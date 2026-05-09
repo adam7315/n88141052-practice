@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>簡報練習 — N88141052 陳俊嘉</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --accent: #58a6ff;
+    --accent-dim: rgba(88,166,255,0.15);
+    --green: #3fb950;
+    --green-dim: rgba(63,185,80,0.15);
+    --yellow: #e3b341;
+    --red: #f85149;
+    --radius: 10px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── Header ── */
+  #header {
+    padding: 10px 20px 8px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+  #header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  #slide-counter {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  #slide-counter span { color: var(--accent); font-weight: 700; font-size: 15px; }
+  #overall-progress {
+    font-size: 12px;
+    color: var(--green);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  #progress-bar-wrap {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  #progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--green));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  #dots {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+  .dot {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .dot:hover { border-color: var(--accent); color: var(--accent); }
+  .dot.current { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+  .dot.done { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+  .dot.done::after { content: '✓'; font-size: 11px; }
+  .dot.done span { display: none; }
+
+  /* ── Main ── */
+  #main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    gap: 0;
+  }
+
+  /* Slide panel */
+  #slide-panel {
+    flex: 0 0 60%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    padding: 16px;
+    overflow: hidden;
+  }
+  #slide-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 6px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+
+  /* Script panel */
+  #script-panel {
+    flex: 0 0 40%;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  #en-section {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    scroll-behavior: smooth;
+  }
+  #en-section::-webkit-scrollbar { width: 4px; }
+  #en-section::-webkit-scrollbar-track { background: transparent; }
+  #en-section::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .en-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  .sentence {
+    padding: 9px 12px;
+    margin-bottom: 6px;
+    border-radius: var(--radius);
+    border: 1.5px solid transparent;
+    background: var(--surface2);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text);
+    transition: all 0.15s;
+    position: relative;
+  }
+  .sentence::before {
+    content: '▶';
+    font-size: 9px;
+    color: var(--text-muted);
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .sentence:hover {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+  }
+  .sentence:hover::before { opacity: 1; }
+  .sentence.playing {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+    color: #fff;
+    box-shadow: 0 0 0 3px rgba(88,166,255,0.2);
+  }
+  .sentence.playing::before { opacity: 1; color: var(--accent); }
+  .sentence.heard {
+    border-color: var(--green);
+  }
+  .sentence.heard::after {
+    content: '✓';
+    font-size: 10px;
+    color: var(--green);
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .sentence.heard::before { display: none; }
+
+  /* Controls */
+  #controls {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+  .btn {
+    padding: 7px 14px;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.15s;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: #79b8ff; }
+  .btn-stop { background: var(--surface2); color: var(--red); border: 1.5px solid var(--border); }
+  .btn-stop:hover { background: rgba(248,81,73,0.15); border-color: var(--red); }
+  .btn-stop:disabled { opacity: 0.4; cursor: default; }
+  .speed-select {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    border-radius: 7px;
+    padding: 6px 8px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  #repeat-btn {
+    background: var(--surface2);
+    color: var(--text-muted);
+    border: 1.5px solid var(--border);
+  }
+  #repeat-btn.active {
+    color: var(--yellow);
+    border-color: var(--yellow);
+    background: rgba(227,179,65,0.1);
+  }
+
+  /* Chinese section */
+  #zh-section {
+    flex-shrink: 0;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+  #zh-toggle {
+    width: 100%;
+    padding: 10px 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+    display: flex; align-items: center; gap: 6px;
+    transition: color 0.15s;
+  }
+  #zh-toggle:hover { color: var(--text); }
+  #zh-toggle .arrow { transition: transform 0.2s; font-size: 10px; }
+  #zh-toggle.open .arrow { transform: rotate(90deg); }
+  #zh-content {
+    display: none;
+    padding: 0 16px 12px;
+    max-height: 160px;
+    overflow-y: auto;
+  }
+  #zh-content.open { display: block; }
+  .zh-line {
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text-muted);
+    padding: 2px 0;
+  }
+
+  /* Footer */
+  #footer {
+    padding: 10px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .btn-nav {
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-nav:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .btn-nav:disabled { opacity: 0.3; cursor: default; }
+  #btn-done {
+    flex: 1;
+    padding: 9px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  #btn-done:hover { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+  #btn-done.done-state {
+    border-color: var(--green);
+    color: var(--green);
+    background: var(--green-dim);
+  }
+
+  /* Celebration */
+  #confetti-wrap {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 999;
+    display: none;
+  }
+  .confetti-piece {
+    position: absolute;
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    animation: confettiFall 1.2s ease-out forwards;
+  }
+  @keyframes confettiFall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--green);
+    color: #000;
+    padding: 10px 24px;
+    border-radius: 24px;
+    font-weight: 700;
+    font-size: 14px;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    z-index: 1000;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Selection word popup */
+  #sel-popup {
+    position: fixed;
+    display: none;
+    align-items: center;
+    gap: 7px;
+    background: #2d333b;
+    border: 1.5px solid var(--accent);
+    border-radius: 20px;
+    padding: 5px 6px 5px 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+    z-index: 998;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    pointer-events: all;
+  }
+  #sel-popup.show { display: flex; }
+  #sel-popup .sel-word {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #sel-popup .sel-play {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 14px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  #sel-popup .sel-play:hover { background: #79b8ff; }
+  #sel-popup .sel-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 4px;
+    line-height: 1;
+  }
+  #sel-popup .sel-close:hover { color: var(--text); }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div id="header-top">
+    <div id="slide-counter">第 <span id="cur-num">1</span> / 17 頁</div>
+    <div id="overall-progress">完成 0 / 17</div>
+  </div>
+  <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+  <div id="dots"></div>
+</div>
+
+<div id="main">
+  <div id="slide-panel">
+    <img id="slide-img" src="slides_img/slide_1.png" alt="投影片 1">
+  </div>
+
+  <div id="script-panel">
+    <div id="en-section">
+      <div class="en-label">English Script — 點擊句子可單獨播放</div>
+      <div id="sentences-list"></div>
+    </div>
+
+    <div id="controls">
+      <button class="btn btn-primary" id="btn-play-all">▶ 全部播放</button>
+      <button class="btn btn-stop" id="btn-stop" disabled>■ 停止</button>
+      <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
+        <select class="speed-select" id="voice-select" title="選擇人聲" style="max-width:180px">
+          <option value="">載入中…</option>
+        </select>
+        <div id="voice-hint" style="font-size:10px;color:var(--text-muted);padding-left:2px;white-space:nowrap"></div>
+      </div>
+      <select class="speed-select" id="speed-select" title="播放速度">
+        <option value="0.7">慢速 0.7×</option>
+        <option value="0.85" selected>學習 0.85×</option>
+        <option value="1.0">正常 1.0×</option>
+        <option value="1.2">快速 1.2×</option>
+      </select>
+      <button class="btn btn-nav" id="repeat-btn" title="循環播放此頁">↺</button>
+    </div>
+    <div id="edge-hint" style="display:none;padding:7px 16px;background:#1c2128;border-top:1px solid var(--border);font-size:12px;color:var(--yellow);display:flex;align-items:center;gap:8px">
+      <span>⚡ 用 Edge 開啟可解鎖 50+ 種 Natural 人聲</span>
+      <button onclick="openInEdge()" style="background:var(--accent);color:#000;border:none;border-radius:5px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer">用 Edge 開啟</button>
+    </div>
+
+    <div id="zh-section">
+      <button id="zh-toggle"><span class="arrow">▶</span> 中文對照</button>
+      <div id="zh-content"><div id="zh-lines"></div></div>
+    </div>
+  </div>
+</div>
+
+<div id="footer">
+  <button class="btn-nav" id="btn-prev">← 上一頁</button>
+  <button id="btn-done">完成此頁 ✓</button>
+  <button class="btn-nav" id="btn-next">下一頁 →</button>
+</div>
+
+<div id="confetti-wrap"></div>
+<div id="toast"></div>
+<div id="sel-popup">
+  <span class="sel-word" id="sel-word-text"></span>
+  <button class="sel-play" id="sel-play-btn">▶ 聽發音</button>
+  <button class="sel-close" id="sel-close-btn">✕</button>
+</div>
+
+<script>
+const SLIDES = [
+  {
+    en: [
+      'Today, I will introduce "Developing an Explainable Deep Learning Module Based on the LSTM Framework for Flood Prediction."',
+      'This paper was published in Frontiers in Water in 2025.',
+      'My name is Chen Chun Chia.'
+    ],
+    zh: [
+      '各位老師好。',
+      '今天我要介紹的題目是「以LSTM架構為基礎之可解釋深度學習洪水預測模組建構」。',
+      '本研究發表於2025年的 Frontiers in Water 期刊。',
+      '我是陳俊嘉。'
+    ]
+  },
+  {
+    en: [
+      'On the left are traditional hydrological models.',
+      'They are physically interpretable and easy to understand, but they may struggle with highly complex nonlinear problems.',
+      'In the middle is the LSTM neural network.',
+      'It has strong prediction ability and can handle complex data, but it is often treated as a "black box."',
+      'Our study, shown on the right, combines both advantages.',
+      'The Explainable LSTM keeps the high accuracy of LSTM while also showing which time periods and variables the model focuses on.'
+    ],
+    zh: [
+      '左邊是傳統水文模型，它的優點是物理意義清楚、容易理解，但在複雜非線性問題上有時能力有限。',
+      '中間是LSTM神經網路，它的預測能力很強，可以處理複雜資料，但通常被認為是「黑盒子」，很難知道模型為什麼做出這個判斷。',
+      '而我們這個研究的重點，在右邊。',
+      '我們提出的Explainable LSTM，同時保留了LSTM的高準確度，也能直接看到模型關注哪些時間與哪些資料。'
+    ]
+  },
+  {
+    en: [
+      'This slide shows our proposed Gated Module framework.',
+      'The input includes 30 days of rainfall, temperature, and streamflow data.',
+      'The Gated Module selects important information, and Self-Attention learns relationships between variables.',
+      'Then, the LSTM learns temporal patterns, and the FCNN produces the final streamflow prediction.',
+      'This method improves accuracy while also making the model easier to understand.'
+    ],
+    zh: [
+      '這一頁是我們提出的 Gated Module 架構。',
+      '左邊是輸入資料，包括降雨、溫度與流量等30天時間序列。',
+      '接著 Gated Module 會先判斷哪些資訊重要。',
+      'Self-Attention 會分析不同變數之間的關聯。',
+      '之後 LSTM 學習時間變化與歷史記憶，最後由 FCNN 輸出流量預測結果。',
+      '這個方法不只提高準確度，也讓模型更容易被理解。'
+    ]
+  },
+  {
+    en: [
+      'We used the CAMELS dataset from the United States, including 531 catchments.',
+      'The input contains six hydro-meteorological variables, such as rainfall, temperature, and streamflow.',
+      'The data were divided into training and testing sets to build and evaluate the prediction model.'
+    ],
+    zh: [
+      '我們使用美國 CAMELS 資料集，共531個流域測站。',
+      '輸入包含6種水文氣象變數，例如降雨、溫度與流量。',
+      '資料分成訓練與測試兩部分，用來建立與驗證流量預測模型。'
+    ]
+  },
+  {
+    en: [
+      'First, the model organizes 30 days of data with six variables into a matrix.',
+      'Next, the Gated Module filters important information and reduces unnecessary noise.',
+      'Then, Self-Attention learns relationships between variables, and the LSTM captures temporal patterns.',
+      'Finally, the Prediction Module generates the streamflow prediction.',
+      'In short, instead of feeding all data directly into AI, we first help the model focus on the most important information.'
+    ],
+    zh: [
+      '首先，模型會先整理30天、6種變數的資料矩陣。',
+      '接著 Gated Module 會先篩選重要資訊，避免不重要的資料干擾模型。',
+      '之後 Self-Attention 分析不同變數之間的關聯，再交給 LSTM 學習時間變化。',
+      '最後由 Prediction Module 輸出流量預測結果。',
+      '簡單來說，我們不是直接把所有資料丟進AI，而是先幫模型找到真正重要的資訊。'
+    ]
+  },
+  {
+    en: [
+      'This slide explains how the model predicts streamflow.',
+      'First, the LSTM processes 30 days of weighted input data and learns temporal patterns from historical information.',
+      'Next, the prediction module, which contains two FCNN layers, converts the hidden state into the final streamflow prediction.',
+      'Finally, we analyze the gated weights to identify the most important days used by the model.',
+      'This helps us understand not only the prediction result, but also how the AI makes its decision.'
+    ],
+    zh: [
+      '這一頁是在說明模型如何進行流量預測。',
+      '首先，LSTM 會處理30天的加權輸入資料，學習歷史時間序列中的變化特徵。',
+      '接著，Prediction Module 透過兩層 FCNN，將隱藏狀態轉換成最終的流量預測結果。',
+      '最後，我們分析 gated weights，找出模型最重視的關鍵日期。',
+      '這不只讓我們看到預測結果，也能進一步理解 AI 是如何做出判斷的。'
+    ]
+  },
+  {
+    en: [
+      'The paper used three metrics: MSE, CC, and NSE.',
+      'MSE measures prediction error.',
+      'CC evaluates how well the temporal patterns match.',
+      'And NSE measures overall prediction skill.',
+      'The study also compared the proposed method with two Explainable AI benchmark methods: Saliency Maps and Feature Ablation.'
+    ],
+    zh: [
+      '這一頁是在說明該研究如何評估模型表現。',
+      '研究中使用三種指標：MSE、CC 與 NSE。',
+      'MSE 用來衡量預測誤差。',
+      'CC 評估時間序列變化是否一致。',
+      'NSE 則代表整體預測能力。',
+      '另外，研究也與兩種可解釋AI方法進行比較，包括 Saliency Maps 與 Feature Ablation。'
+    ]
+  },
+  {
+    en: [
+      'This slide shows the model performance across 531 catchments in the United States.',
+      'The first map presents MSE, which measures prediction error. Larger rivers may naturally have higher errors because of larger discharge values.',
+      'The second map shows CC, which evaluates how well the model captures temporal patterns. Most western and eastern regions achieved values above 0.8.',
+      'The third map shows NSE, which measures overall prediction performance. Higher NSE values indicate better model skill.',
+      'Overall, the results show that the gated model maintains strong prediction performance while still providing interpretability.'
+    ],
+    zh: [
+      '這一頁展示模型在美國531個流域中的預測表現。',
+      '第一張圖是 MSE，用來衡量預測誤差。由於大型河川流量較大，因此誤差通常也會比較高。',
+      '第二張圖是 CC，用來評估模型是否能掌握流量變化的時間趨勢。大部分東西岸地區的結果都超過0.8。',
+      '第三張圖是 NSE，用來評估整體預測能力，數值越高代表模型表現越好。',
+      '整體結果顯示，這個 gated model 在維持高預測能力的同時，也保有良好的可解釋性。'
+    ]
+  },
+  {
+    en: [
+      'Following the previous performance analysis, this slide further explores how much historical information the model actually uses.',
+      'The results show that most stations mainly rely on the most recent 5 to 10 days of streamflow information.',
+      'For precipitation, the model focuses more on short-term rainfall events, indicating that recent rainfall has the strongest impact on flooding.',
+      'However, temperature shows a different pattern.',
+      'Some western U.S. regions require more than 25 days of historical temperature information, likely related to snowmelt and soil water storage.',
+      'These results suggest that different variables operate on different time scales, and the model can automatically identify the most important periods.'
+    ],
+    zh: [
+      '延續上一頁的模型表現分析，這裡進一步探討模型實際依賴多少歷史資料進行預測。',
+      '結果顯示，大部分測站主要使用最近5到10天的流量資訊。',
+      '在降雨部分，模型更關注短期降雨事件，代表近期降雨對洪水影響最大。',
+      '不過在溫度變數中，部分美國西部地區需要超過25天的歷史資訊，可能與融雪及土壤含水量有關。',
+      '這表示不同變數有不同的影響時間尺度，而模型能自動辨識哪些時間資訊最重要。'
+    ]
+  },
+  {
+    en: [
+      'The study classified the gated information into four hydrological mechanism types.',
+      'The map on the bottom right shows the spatial distribution of these four types across the United States.',
+      'The three figures above explain the classification process.',
+      'Figure A separates precipitation-dominant and temperature-dominant patterns.',
+      'Figure B classifies precipitation into short-term or long-term effects.',
+      'Figure C classifies temperature into short-term or long-term effects.',
+      'By combining these patterns, the study defines four hydrological mechanism types.'
+    ],
+    zh: [
+      '文章將gated information分成四種不同的水文機制類型。',
+      '右下角地圖顯示這四種類型在美國各流域中的空間分布情形。',
+      '右上方三張圖則是在說明分類方式。',
+      '圖(a)先區分降雨主導與溫度主導型態。',
+      '圖(b)再將降雨分成短期與長期影響。',
+      '圖(c)則將溫度分成短期與長期影響。',
+      '最後組合形成四種水文機制類型。'
+    ]
+  },
+  {
+    en: [
+      'Figure 6 shows that different catchments respond to flood drivers over different time scales.',
+      'Some stations mainly react to recent rainfall, while others are influenced by long-term precipitation or temperature conditions.',
+      'These patterns demonstrate that the gated model can automatically identify different flood-generation mechanisms across regions.'
+    ],
+    zh: [
+      'Figure 6顯示，不同流域對洪水驅動因子的反應時間尺度並不相同。',
+      '有些測站主要受到近期降雨影響，而有些則較受到長期降雨或溫度條件控制。',
+      '這些結果證明，gated model能自動辨識不同區域的洪水形成機制。'
+    ]
+  },
+  {
+    en: [
+      'The heaviest rainfall does not always produce the biggest flood.',
+      'On the right figure, we can see that two storms in 2005 both exceeded 100 millimeters of rainfall, but the flood peaks were relatively similar.',
+      'However, the largest flood peak occurred in 2007, even though the daily rainfall was not extremely high.',
+      'The heatmap on the left helps explain this difference.',
+      'The model does not only focus on rainfall, but also considers long-term temperature, humidity, and soil moisture conditions from previous days.',
+      'This shows that flood generation depends on both recent rainfall and antecedent environmental conditions.'
+    ],
+    zh: [
+      '最大暴雨，不一定會造成最大洪水。',
+      '右邊圖中可以看到，2005年有兩次降雨都超過100毫米，但洪峰高度其實差異不大。',
+      '反而2007年的最大洪峰，當時的單日降雨量並沒有特別高。',
+      '左邊的熱圖則幫助我們解釋這個現象。',
+      '模型不只關注降雨本身，也同時考慮長時間的溫度、濕度以及土壤含水狀態。',
+      '這代表洪水形成不只是看當天暴雨，還受到前期環境條件影響。'
+    ]
+  },
+  {
+    en: [
+      'This figure tests whether the gated module really works.',
+      'In Experiment 1, the study removed radiation data because the model considered it less important.',
+      'The prediction result changed very little.',
+      'In Experiment 2, the input data was reduced from 30 days to 10 days.',
+      'The model still performed very well, showing that recent information is more important.',
+      'However, in Experiment 3, adding too much historical data actually reduced performance.'
+    ],
+    zh: [
+      '這一頁是在測試gated module是不是真的有效。',
+      '在實驗1中，作者移除模型認為不重要的輻射資料。',
+      '結果預測幾乎沒有變化。',
+      '在實驗2中，作者把輸入資料從30天縮短成10天。',
+      '模型表現仍然很好，代表近期資料其實最重要。',
+      '但在實驗3中，加入太多歷史資料後，模型表現反而變差。'
+    ]
+  },
+  {
+    en: [
+      'This figure compares three Explainable AI methods.',
+      'Saliency observes which inputs most strongly affect the prediction.',
+      'Feature Ablation removes one variable at a time to see how the result changes.',
+      'The Gated method directly learns which information is important inside the model.',
+      'Although the methods work differently, they all show that Streamflow is the most important information.'
+    ],
+    zh: [
+      '這張圖比較三種Explainable AI方法。',
+      'Saliency是觀察哪些輸入資訊最容易影響預測結果。',
+      'Feature Ablation是一次移除一個變數，觀察結果怎麼改變。',
+      'Gated method則是在模型內部直接學習哪些資訊重要。',
+      '雖然三種方法做法不同，但都顯示Streamflow(SF)是最重要的資訊。'
+    ]
+  },
+  {
+    en: [
+      'This figure further compares the results of different Explainable AI methods.',
+      'The heatmap shows that the Gated method and Saliency produce very similar patterns.',
+      'The bar chart also shows that all methods identify Streamflow as the most important variable.',
+      'At the bottom, the curves rise sharply near Day 30, meaning recent information has the strongest influence on flood prediction.'
+    ],
+    zh: [
+      '這張圖進一步比較不同Explainable AI方法的結果。',
+      '左上的熱圖可以看到，Gated method與Saliency呈現非常相似的變化趨勢。',
+      '右上的長條圖也顯示，所有方法都認為Streamflow(SF)是最重要的變數。',
+      '下方曲線則可以發現，在接近Day 30時重要性快速上升，代表近期資訊對洪水預測影響最大。'
+    ]
+  },
+  {
+    en: [
+      'In conclusion, this study shows that the gated method can improve the interpretability of LSTM flood prediction.',
+      'It helps identify important variables, important time windows, and different flood-generation mechanisms across regions.',
+      'Although more studies are still needed to test the model across different regions and hydrologic conditions, the results demonstrate that AI can be used not only for prediction, but also for understanding hydrologic processes.'
+    ],
+    zh: [
+      '總結來說，本研究顯示Gated method能提升LSTM洪水預測模型的可解釋性。',
+      '它可以幫助我們找出重要變數、重要時間區間，以及不同地區的洪水形成機制。',
+      '雖然未來仍需要在更多區域與不同水文條件下進一步驗證模型，但結果證明AI不只能用來進行預測，也能幫助我們理解水文過程。'
+    ]
+  },
+  {
+    en: [
+      'At the end of 2024, I traveled to Switzerland.',
+      'I really enjoyed the beautiful mountains and snowy scenery there.',
+      'One thing that impressed me was the sky.',
+      'The skies over Switzerland are always busy — full of planes and people leaping out of them.',
+      'It feels like the Swiss never go to work; they just ski and paraglide all day.'
+    ],
+    zh: [
+      '2024年底，我到瑞士旅遊。',
+      '我非常喜歡那裡的雪山與風景。',
+      '其中讓我印象最深刻的是天空。',
+      '瑞士的天空總是很熱鬧，到處都是飛機與跳傘的人。',
+      '感覺瑞士人好像都不用上班，每天都在滑雪和飛行傘。'
+    ]
+  }
+];
+
+const TOTAL = SLIDES.length;
+let currentSlide = 0;
+let heardSentences = [];   // Set of sentence indices heard on current slide
+let completed = new Array(TOTAL).fill(false);
+let isPlaying = false;
+let repeatMode = false;
+let utterQueue = [];
+let allEnVoices = [];
+
+// Load progress from localStorage
+function loadProgress() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('ppt_progress_n88141052') || '{}');
+    if (saved.completed) completed = saved.completed;
+    if (typeof saved.currentSlide === 'number') currentSlide = saved.currentSlide;
+  } catch(e) {}
+}
+function saveProgress() {
+  try {
+    localStorage.setItem('ppt_progress_n88141052', JSON.stringify({ completed, currentSlide }));
+  } catch(e) {}
+}
+
+// Voice init — populate dropdown with all English voices
+function initVoice() {
+  const voices = window.speechSynthesis.getVoices();
+  // 只保留美國 + 英國英文語音，最多30組
+  const usVoices = voices.filter(v => v.lang.startsWith('en-US')).slice(0, 20);
+  const gbVoices = voices.filter(v => v.lang.startsWith('en-GB')).slice(0, 10);
+  allEnVoices = [...usVoices, ...gbVoices];
+  if (!allEnVoices.length) return;
+
+  const sel = document.getElementById('voice-select');
+  const saved = localStorage.getItem('ppt_voice_n88141052');
+  sel.innerHTML = '';
+
+  // Country labels（只顯示美國和英國）
+  const COUNTRY = {
+    'en-US': '🇺🇸 美式英語',
+    'en-GB': '🇬🇧 英式英語',
+  };
+
+  // Female name patterns (known Microsoft/Google voices)
+  const FEMALE_PAT = /\b(Jenny|Aria|Ana|Michelle|Monica|Sara|Sonia|Maisie|Libby|Abbie?|Annette|Darcy|Freya|Joanne|Kim|Natasha|Tina|Neerja|Zira|Susan|Catherine|Clara|Heera|Leah|Raveena|Priya|Abbi|Ava|Emma|Alice|Hazel|Olive|Layla|Jasmine|Willow|Molly|Pita|Rosa|Nia|Jane|Female)\b/i;
+
+  function guessGender(v) {
+    if (FEMALE_PAT.test(v.name)) return 'female';
+    if (/male/i.test(v.name) && !/female/i.test(v.name)) return 'male';
+    return 'male';
+  }
+
+  function shortName(v) {
+    return v.name
+      .replace(/^Microsoft /, '').replace(/^Google /, '')
+      .replace(/ Online \(Natural\)$/, ' ★').replace(/ Desktop$/, '')
+      .replace(/ - .+$/, '').replace(/\s+\(.*\)$/, '');
+  }
+
+  // Build groups: { 'en-US__female': { label, voices[] }, ... }
+  const groups = {};
+  allEnVoices.forEach(v => {
+    const lang = v.lang.slice(0, 5);
+    const countryLabel = COUNTRY[lang] || '🌐 其他英語';
+    const gender = guessGender(v);
+    const key = `${lang}__${gender}`;
+    if (!groups[key]) {
+      groups[key] = {
+        label: `${countryLabel}  ${gender === 'female' ? '👩 女聲' : '👨 男聲'}`,
+        voices: [], lang, gender
+      };
+    }
+    groups[key].voices.push(v);
+  });
+
+  // Sort order: country priority then female before male
+  const LANG_ORDER = ['en-US','en-GB','en-AU','en-IN','en-CA','en-IE','en-NZ','en-SG','en-ZA'];
+  const sortedKeys = Object.keys(groups).sort((a, b) => {
+    const [la, ga] = a.split('__');
+    const [lb, gb] = b.split('__');
+    const li = LANG_ORDER.indexOf(la) === -1 ? 99 : LANG_ORDER.indexOf(la);
+    const lj = LANG_ORDER.indexOf(lb) === -1 ? 99 : LANG_ORDER.indexOf(lb);
+    if (li !== lj) return li - lj;
+    return (ga === 'female' ? 0 : 1) - (gb === 'female' ? 0 : 1);
+  });
+
+  sortedKeys.forEach(key => {
+    const g = groups[key];
+    const grp = document.createElement('optgroup');
+    grp.label = g.label;
+    g.voices.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v.name;
+      const isNatural = /Natural|Enhanced|Premium|Neural/.test(v.name);
+      opt.textContent = (isNatural ? '★ ' : '') + shortName(v);
+      if (v.name === saved) opt.selected = true;
+      grp.appendChild(opt);
+    });
+    sel.appendChild(grp);
+  });
+
+  // Default: Jenny or first natural US female > any US > first
+  if (!saved || !allEnVoices.find(v => v.name === saved)) {
+    const preferred =
+      allEnVoices.find(v => /Jenny/i.test(v.name)) ||
+      allEnVoices.find(v => /Natural|Enhanced|Premium|Neural/.test(v.name) && v.lang.startsWith('en-US') && guessGender(v) === 'female') ||
+      allEnVoices.find(v => /Natural|Enhanced|Premium|Neural/.test(v.name) && v.lang.startsWith('en-US')) ||
+      allEnVoices.find(v => v.lang.startsWith('en-US')) ||
+      allEnVoices[0];
+    if (preferred) sel.value = preferred.name;
+  }
+
+  // Update hint
+  document.getElementById('voice-hint').textContent = `${allEnVoices.length} 種語音`;
+
+  // Show Edge hint if few voices
+  const isEdge = navigator.userAgent.includes('Edg/');
+  document.getElementById('edge-hint').style.display =
+    (allEnVoices.length < 5 && !isEdge) ? 'flex' : 'none';
+
+  sel.addEventListener('change', () => {
+    localStorage.setItem('ppt_voice_n88141052', sel.value);
+    const v = allEnVoices.find(x => x.name === sel.value);
+    if (v) showToast((guessGender(v) === 'female' ? '👩 ' : '👨 ') + shortName(v));
+  });
+}
+
+function getSelectedVoice() {
+  const name = document.getElementById('voice-select').value;
+  return allEnVoices.find(v => v.name === name) || allEnVoices[0] || null;
+}
+
+function openInEdge() {
+  const path = window.location.href;
+  window.location.href = 'microsoft-edge:' + path;
+}
+
+window.speechSynthesis.onvoiceschanged = initVoice;
+initVoice();
+
+// Render dots
+function renderDots() {
+  const wrap = document.getElementById('dots');
+  wrap.innerHTML = '';
+  for (let i = 0; i < TOTAL; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i === currentSlide ? ' current' : '') + (completed[i] ? ' done' : '');
+    dot.title = `第 ${i+1} 頁`;
+    dot.innerHTML = completed[i] ? '<span></span>' : `<span>${i+1}</span>`;
+    dot.addEventListener('click', () => goToSlide(i));
+    wrap.appendChild(dot);
+  }
+}
+
+// Render sentences
+function renderSentences() {
+  heardSentences = [];
+  const list = document.getElementById('sentences-list');
+  list.innerHTML = '';
+  const data = SLIDES[currentSlide];
+  data.en.forEach((text, idx) => {
+    const div = document.createElement('div');
+    div.className = 'sentence';
+    div.dataset.idx = idx;
+    div.textContent = text;
+    div.addEventListener('click', () => speakSentence(idx));
+    list.appendChild(div);
+  });
+  // Chinese
+  const zhList = document.getElementById('zh-lines');
+  zhList.innerHTML = '';
+  data.zh.forEach(line => {
+    const div = document.createElement('div');
+    div.className = 'zh-line';
+    div.textContent = line;
+    zhList.appendChild(div);
+  });
+}
+
+// Update header
+function updateHeader() {
+  document.getElementById('cur-num').textContent = currentSlide + 1;
+  const doneCount = completed.filter(Boolean).length;
+  document.getElementById('overall-progress').textContent = `完成 ${doneCount} / ${TOTAL}`;
+  document.getElementById('progress-bar').style.width = (doneCount / TOTAL * 100) + '%';
+}
+
+// Update footer buttons
+function updateFooter() {
+  document.getElementById('btn-prev').disabled = currentSlide === 0;
+  document.getElementById('btn-next').disabled = currentSlide === TOTAL - 1;
+  const btnDone = document.getElementById('btn-done');
+  if (completed[currentSlide]) {
+    btnDone.textContent = '✓ 已完成此頁';
+    btnDone.classList.add('done-state');
+  } else {
+    btnDone.textContent = '完成此頁 ✓';
+    btnDone.classList.remove('done-state');
+  }
+}
+
+// Go to slide
+function goToSlide(idx) {
+  stopSpeech();
+  currentSlide = idx;
+  document.getElementById('slide-img').src = `slides_img/slide_${idx + 1}.png`;
+  renderSentences();
+  updateHeader();
+  updateFooter();
+  renderDots();
+  saveProgress();
+  document.getElementById('en-section').scrollTop = 0;
+}
+
+// Speak single sentence
+function speakSentence(idx) {
+  stopSpeech();
+  const text = SLIDES[currentSlide].en[idx];
+  const speed = parseFloat(document.getElementById('speed-select').value);
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = speed;
+  const v = getSelectedVoice(); if (v) utter.voice = v;
+  utter.lang = 'en-US';
+
+  highlightSentence(idx);
+  utter.onend = () => {
+    markHeard(idx);
+    clearHighlight();
+    isPlaying = false;
+    document.getElementById('btn-stop').disabled = true;
+  };
+  utter.onerror = () => { clearHighlight(); isPlaying = false; };
+  isPlaying = true;
+  document.getElementById('btn-stop').disabled = false;
+  window.speechSynthesis.speak(utter);
+}
+
+// Play all sentences
+function playAll(startIdx = 0) {
+  stopSpeech();
+  const sentences = SLIDES[currentSlide].en;
+  const speed = parseFloat(document.getElementById('speed-select').value);
+  isPlaying = true;
+  document.getElementById('btn-stop').disabled = false;
+
+  function playNext(idx) {
+    if (idx >= sentences.length) {
+      isPlaying = false;
+      document.getElementById('btn-stop').disabled = true;
+      clearHighlight();
+      if (repeatMode) {
+        setTimeout(() => playAll(0), 800);
+      }
+      return;
+    }
+    const utter = new SpeechSynthesisUtterance(sentences[idx]);
+    utter.rate = speed;
+    const v = getSelectedVoice(); if (v) utter.voice = v;
+    utter.lang = 'en-US';
+    highlightSentence(idx);
+    scrollToSentence(idx);
+    utter.onend = () => {
+      markHeard(idx);
+      playNext(idx + 1);
+    };
+    utter.onerror = () => {
+      clearHighlight();
+      isPlaying = false;
+      document.getElementById('btn-stop').disabled = true;
+    };
+    window.speechSynthesis.speak(utter);
+  }
+  playNext(startIdx);
+}
+
+function highlightSentence(idx) {
+  document.querySelectorAll('.sentence').forEach(el => el.classList.remove('playing'));
+  const el = document.querySelector(`.sentence[data-idx="${idx}"]`);
+  if (el) el.classList.add('playing');
+}
+function clearHighlight() {
+  document.querySelectorAll('.sentence').forEach(el => el.classList.remove('playing'));
+}
+function markHeard(idx) {
+  if (!heardSentences.includes(idx)) heardSentences.push(idx);
+  const el = document.querySelector(`.sentence[data-idx="${idx}"]`);
+  if (el) { el.classList.remove('playing'); el.classList.add('heard'); }
+}
+function scrollToSentence(idx) {
+  const el = document.querySelector(`.sentence[data-idx="${idx}"]`);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+function stopSpeech() {
+  window.speechSynthesis.cancel();
+  isPlaying = false;
+  clearHighlight();
+  document.getElementById('btn-stop').disabled = true;
+}
+
+// Mark done
+function markDone() {
+  const wasAlready = completed[currentSlide];
+  completed[currentSlide] = !wasAlready;
+  updateHeader();
+  updateFooter();
+  renderDots();
+  saveProgress();
+  if (completed[currentSlide]) {
+    showToast('✓ 第 ' + (currentSlide + 1) + ' 頁完成！');
+    celebrate();
+    if (currentSlide < TOTAL - 1) {
+      setTimeout(() => goToSlide(currentSlide + 1), 1200);
+    }
+  }
+}
+
+// Toast
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// Celebrate confetti
+function celebrate() {
+  const wrap = document.getElementById('confetti-wrap');
+  wrap.style.display = 'block';
+  wrap.innerHTML = '';
+  const colors = ['#58a6ff','#3fb950','#e3b341','#f0883e','#bc8cff'];
+  for (let i = 0; i < 50; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.cssText = `
+      left: ${Math.random() * 100}%;
+      top: -10px;
+      background: ${colors[Math.floor(Math.random() * colors.length)]};
+      width: ${6 + Math.random() * 8}px;
+      height: ${6 + Math.random() * 8}px;
+      animation-delay: ${Math.random() * 0.5}s;
+      animation-duration: ${1 + Math.random() * 0.8}s;
+    `;
+    wrap.appendChild(p);
+  }
+  setTimeout(() => { wrap.style.display = 'none'; wrap.innerHTML = ''; }, 2000);
+}
+
+// Event listeners
+document.getElementById('btn-play-all').addEventListener('click', () => playAll(0));
+document.getElementById('btn-stop').addEventListener('click', stopSpeech);
+document.getElementById('btn-prev').addEventListener('click', () => goToSlide(currentSlide - 1));
+document.getElementById('btn-next').addEventListener('click', () => goToSlide(currentSlide + 1));
+document.getElementById('btn-done').addEventListener('click', markDone);
+
+document.getElementById('repeat-btn').addEventListener('click', () => {
+  repeatMode = !repeatMode;
+  document.getElementById('repeat-btn').classList.toggle('active', repeatMode);
+  showToast(repeatMode ? '循環模式已開啟' : '循環模式已關閉');
+});
+
+document.getElementById('zh-toggle').addEventListener('click', function() {
+  this.classList.toggle('open');
+  document.getElementById('zh-content').classList.toggle('open');
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'SELECT') return;
+  if (e.key === 'ArrowRight' && currentSlide < TOTAL - 1) goToSlide(currentSlide + 1);
+  if (e.key === 'ArrowLeft' && currentSlide > 0) goToSlide(currentSlide - 1);
+  if (e.key === ' ') { e.preventDefault(); isPlaying ? stopSpeech() : playAll(0); }
+  if (e.key === 'Enter') markDone();
+  if (e.key === 'Escape') hideSelPopup();
+});
+
+// ── 選字發音 ──────────────────────────────────────
+let selWord = '';
+
+function showSelPopup(text, anchorRect) {
+  selWord = text;
+  const popup = document.getElementById('sel-popup');
+  document.getElementById('sel-word-text').textContent = `"${text}"`;
+  // 計算位置：選取範圍正上方，水平居中
+  const x = anchorRect.left + anchorRect.width / 2;
+  const y = anchorRect.top + window.scrollY - 52;
+  popup.style.left = x + 'px';
+  popup.style.top = Math.max(y, 8) + 'px';
+  popup.classList.add('show');
+}
+
+function hideSelPopup() {
+  document.getElementById('sel-popup').classList.remove('show');
+  selWord = '';
+}
+
+function speakWord(text) {
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = parseFloat(document.getElementById('speed-select').value);
+  utter.lang = 'en-US';
+  const v = getSelectedVoice(); if (v) utter.voice = v;
+  utter.onend = () => hideSelPopup();
+  window.speechSynthesis.speak(utter);
+}
+
+// 在英文稿區域監聽滑鼠放開
+document.getElementById('en-section').addEventListener('mouseup', () => {
+  setTimeout(() => {               // 等瀏覽器完成選取
+    const sel = window.getSelection();
+    const text = sel.toString().trim().replace(/\s+/g, ' ');
+    if (!text || text.length > 80) { hideSelPopup(); return; }
+    const range = sel.getRangeAt(0);
+    showSelPopup(text, range.getBoundingClientRect());
+  }, 10);
+});
+
+// 點別處關閉彈窗
+document.addEventListener('mousedown', e => {
+  const popup = document.getElementById('sel-popup');
+  if (!popup.contains(e.target)) hideSelPopup();
+});
+
+document.getElementById('sel-play-btn').addEventListener('click', () => {
+  if (selWord) speakWord(selWord);
+});
+document.getElementById('sel-close-btn').addEventListener('click', hideSelPopup);
+
+// Init
+loadProgress();
+renderDots();
+renderSentences();
+updateHeader();
+updateFooter();
+document.getElementById('slide-img').src = `slides_img/slide_${currentSlide + 1}.png`;
+
+// Keyboard hint
+setTimeout(() => showToast('← → 換頁　Space 播放　Enter 完成'), 500);
+</script>
+</body>
+</html>
