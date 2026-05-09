@@ -833,6 +833,7 @@ let isPlaying = false;
 let repeatMode = false;
 let utterQueue = [];
 let allEnVoices = [];
+let _stopRetryTimer = null;
 
 // Load progress from localStorage
 function loadProgress() {
@@ -1192,6 +1193,7 @@ function speakSentence(idx) {
   utter.onerror = () => { clearHighlight(); isPlaying = false; };
   isPlaying = true;
   document.getElementById('btn-stop').disabled = false;
+  clearTimeout(_stopRetryTimer); _stopRetryTimer = null;
   window.speechSynthesis.speak(utter);
 }
 
@@ -1230,6 +1232,7 @@ function playAll(startIdx = 0) {
       isPlaying = false;
       document.getElementById('btn-stop').disabled = true;
     };
+    clearTimeout(_stopRetryTimer); _stopRetryTimer = null;
     window.speechSynthesis.speak(utter);
   }
   playNext(startIdx);
@@ -1262,18 +1265,19 @@ function scrollToSentence(idx) {
 }
 function stopSpeech() {
   isPlaying = false;
-  try { window.speechSynthesis.pause(); } catch(e) {}
+  clearTimeout(_stopRetryTimer);
   try { window.speechSynthesis.cancel(); } catch(e) {}
   clearHighlight();
   document.getElementById('btn-stop').disabled = true;
-  // Retry cancel for stubborn browsers (iOS Safari)
-  setTimeout(() => {
+  // One retry in case cancel() didn't take immediately (some desktop browsers)
+  _stopRetryTimer = setTimeout(() => {
+    _stopRetryTimer = null;
     try {
       if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
         window.speechSynthesis.cancel();
       }
     } catch(e) {}
-  }, 60);
+  }, 80);
 }
 
 // Mark done
