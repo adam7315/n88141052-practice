@@ -851,11 +851,11 @@ function saveProgress() {
 // 固定5種語音選項，對應系統最佳 Natural 語音
 // 完整性別對照表（Microsoft / Google Natural voices）
 const GENDER_TABLE = {
-  // 🇺🇸 en-US Female
-  'Jenny':F='F','Aria':'F','Ana':'F','Michelle':'F','Monica':'F','Sara':'F',
+  // 🇺🇸 en-US Female (Microsoft Edge Natural)
+  'Jenny':'F','Aria':'F','Ana':'F','Michelle':'F','Monica':'F','Sara':'F',
   'Nancy':'F','Amber':'F','Ashley':'F','Cora':'F','Elizabeth':'F','Emma':'F',
   'Ava':'F','Clara':'F','Zira':'F',
-  // 🇺🇸 en-US Male
+  // 🇺🇸 en-US Male (Microsoft Edge Natural)
   'Guy':'M','Davis':'M','Eric':'M','Roger':'M','Steffan':'M','Tony':'M',
   'Andrew':'M','Brandon':'M','Brian':'M','Christopher':'M','Jacob':'M',
   'Jason':'M','David':'M',
@@ -867,6 +867,13 @@ const GENDER_TABLE = {
   'George':'M','Alfie':'M','Brayden':'M','Callum':'M','Kieran':'M',
   // 🇹🇼 zh-TW
   'Hanhan':'F','HsiaoChen':'F','HiuMaan':'F','YunJhe':'M',
+  // iOS / macOS 內建語音
+  'Samantha':'F','Victoria':'F','Nicky':'F','Ava':'F','Susan':'F','Allison':'F',
+  'Fiona':'F','Karen':'F','Moira':'F','Tessa':'F','Veena':'F',
+  'Alex':'M','Fred':'M','Daniel':'M','Gordon':'M','Lee':'M','Jamie':'M',
+  // Android / Chrome 語音
+  'US':'F', // Google US English (Female)
+  'UK':'M', // Google UK English (Male)
 };
 
 function voiceGender(v) {
@@ -904,23 +911,36 @@ function buildVoiceSelect(voices) {
   sel.innerHTML = '';
 
   const groups = [
-    { label:'🇺🇸 美國 — 女生', lang:'en-US', gender:'F', max:12 },
-    { label:'🇺🇸 美國 — 男生', lang:'en-US', gender:'M', max:12 },
-    { label:'🇬🇧 英國 — 女生', lang:'en-GB', gender:'F', max:6  },
-    { label:'🇬🇧 英國 — 男生', lang:'en-GB', gender:'M', max:6  },
-    { label:'🇹🇼 台灣腔',       lang:'zh-TW', gender:null,max:4  },
+    { label:'🇺🇸 美國 — 女生', lang:'en-US', gender:'F',    max:12 },
+    { label:'🇺🇸 美國 — 男生', lang:'en-US', gender:'M',    max:12 },
+    { label:'🇬🇧 英國 — 女生', lang:'en-GB', gender:'F',    max:6  },
+    { label:'🇬🇧 英國 — 男生', lang:'en-GB', gender:'M',    max:6  },
+    { label:'🇹🇼 台灣腔',       lang:'zh-TW', gender:null,  max:4  },
+    { label:'🌐 其他英語',       lang:'en',    gender:'ALL', max:8  },
   ];
+
+  // 已加入的語音 name 集合，避免在「其他英語」重複
+  const usedNames = new Set();
 
   let firstOpt = null;
   groups.forEach(g => {
-    const list = voices
-      .filter(v => v.lang.startsWith(g.lang) &&
-        (g.gender === null || voiceGender(v) === g.gender))
-      .slice(0, g.max);
+    let list;
+    if (g.gender === 'ALL') {
+      // 兜底：收所有還沒出現過的英語語音
+      list = voices
+        .filter(v => v.lang.startsWith('en') && !usedNames.has(v.name))
+        .slice(0, g.max);
+    } else {
+      list = voices
+        .filter(v => v.lang.startsWith(g.lang) &&
+          (g.gender === null || voiceGender(v) === g.gender))
+        .slice(0, g.max);
+    }
     if (!list.length) return;
     const grp = document.createElement('optgroup');
     grp.label = g.label;
     list.forEach(v => {
+      usedNames.add(v.name);
       const opt = document.createElement('option');
       opt.value = v.name;
       const nat = /Natural|Neural|Enhanced/i.test(v.name);
