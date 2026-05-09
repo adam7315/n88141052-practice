@@ -492,8 +492,8 @@
 
 <div id="header">
   <div id="header-top">
-    <div id="slide-counter">第 <span id="cur-num">1</span> / 17 頁</div>
-    <div id="overall-progress">完成 0 / 17</div>
+    <div id="slide-counter">第 <span id="cur-num">1</span> / <span id="total-num">?</span> 頁</div>
+    <div id="overall-progress">完成 0 / <span id="total-num2">?</span></div>
   </div>
   <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
   <div id="dots"></div>
@@ -970,8 +970,8 @@ function prebuiltFolder() { return (PREBUILT[document.getElementById('voice-sele
 function loadProgress() {
   try {
     const saved = JSON.parse(localStorage.getItem('ppt_progress_n88141052') || '{}');
-    if (saved.completed) completed = saved.completed;
-    if (typeof saved.currentSlide === 'number') currentSlide = saved.currentSlide;
+    if (saved.completed) completed = saved.completed.slice(0, TOTAL);
+    if (typeof saved.currentSlide === 'number') currentSlide = Math.min(saved.currentSlide, TOTAL - 1);
   } catch(e) {}
 }
 function saveProgress() {
@@ -1299,8 +1299,10 @@ function renderSentences() {
 // Update header
 function updateHeader() {
   document.getElementById('cur-num').textContent = currentSlide + 1;
+  document.getElementById('total-num').textContent = TOTAL;
   const doneCount = completed.filter(Boolean).length;
   document.getElementById('overall-progress').textContent = `完成 ${doneCount} / ${TOTAL}`;
+  document.getElementById('total-num2').textContent = TOTAL;
   document.getElementById('progress-bar').style.width = (doneCount / TOTAL * 100) + '%';
 }
 
