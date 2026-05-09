@@ -1147,7 +1147,6 @@ function updateHeader() {
   document.getElementById('total-num').textContent = TOTAL;
   const doneCount = completed.filter(Boolean).length;
   document.getElementById('overall-progress').textContent = `完成 ${doneCount} / ${TOTAL}`;
-  document.getElementById('total-num2').textContent = TOTAL;
   document.getElementById('progress-bar').style.width = (doneCount / TOTAL * 100) + '%';
 }
 
