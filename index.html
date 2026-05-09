@@ -408,6 +408,61 @@
     line-height: 1;
   }
   #sel-popup .sel-close:hover { color: var(--text); }
+
+  /* ── 手機版 RWD ─────────────────────────────── */
+  @media (max-width: 768px) {
+    body { height: auto; min-height: 100vh; overflow-y: auto; overflow-x: hidden; }
+
+    #header { padding: 8px 12px 6px; }
+    .dot { width: 18px; height: 18px; font-size: 8px; }
+    #dots { gap: 3px; }
+
+    #main { flex-direction: column; overflow: visible; height: auto; }
+
+    #slide-panel {
+      flex: 0 0 auto;
+      height: 54vw;
+      min-height: 180px;
+      padding: 8px;
+    }
+
+    #script-panel {
+      flex: 0 0 auto;
+      border-left: none;
+      border-top: 1px solid var(--border);
+      overflow: visible;
+    }
+
+    #en-section {
+      overflow-y: visible;
+      max-height: none;
+      padding: 12px;
+    }
+
+    #controls {
+      flex-wrap: wrap;
+      padding: 8px 12px;
+      gap: 6px;
+    }
+    #controls > div { order: 3; width: 100%; }
+    #controls > div select { width: 100%; max-width: 100% !important; }
+    #voice-hint { display: none; }
+    #btn-play-all { flex: 1; justify-content: center; }
+    #btn-stop { flex: 0 0 auto; }
+    #speed-select { flex: 1; }
+    #repeat-btn { flex: 0 0 auto; }
+
+    #edge-hint { font-size: 11px; padding: 6px 12px; }
+
+    #zh-content { max-height: 200px; }
+
+    #footer { padding: 8px 12px; gap: 8px; }
+    .btn-nav { padding: 8px 14px; font-size: 13px; }
+    #btn-done { font-size: 13px; }
+
+    #sel-popup { max-width: 90vw; }
+    #sel-popup .sel-word { max-width: 120px; }
+  }
 </style>
 </head>
 <body>
@@ -436,10 +491,13 @@
       <button class="btn btn-primary" id="btn-play-all">▶ 全部播放</button>
       <button class="btn btn-stop" id="btn-stop" disabled>■ 停止</button>
       <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
-        <select class="speed-select" id="voice-select" title="選擇人聲" style="max-width:180px">
-          <option value="">載入中…</option>
+        <select class="speed-select" id="voice-select" title="選擇人聲">
+          <option value="us-female">🇺🇸 美國 — 女生</option>
+          <option value="us-male">🇺🇸 美國 — 男生</option>
+          <option value="gb-female">🇬🇧 英國 — 女生</option>
+          <option value="gb-male">🇬🇧 英國 — 男生</option>
+          <option value="tw">🇹🇼 台灣腔</option>
         </select>
-        <div id="voice-hint" style="font-size:10px;color:var(--text-muted);padding-left:2px;white-space:nowrap"></div>
       </div>
       <select class="speed-select" id="speed-select" title="播放速度">
         <option value="0.7">慢速 0.7×</option>
@@ -768,117 +826,59 @@ function saveProgress() {
   } catch(e) {}
 }
 
-// Voice init — populate dropdown with all English voices
+// 固定5種語音選項，對應系統最佳 Natural 語音
+const VOICE_MAP = {
+  'us-female': { names: ['Jenny','Aria','Ana','Michelle','Monica'],  lang: 'en-US' },
+  'us-male':   { names: ['Guy','Davis','Eric','Roger','Steffan'],    lang: 'en-US' },
+  'gb-female': { names: ['Libby','Sonia','Maisie','Abbi'],           lang: 'en-GB' },
+  'gb-male':   { names: ['Ryan','Thomas','Elliot','Oliver','Noah'],  lang: 'en-GB' },
+  'tw':        { names: ['Hanhan','HiuMaan','HsiaoChen'],            lang: 'zh-TW' },
+};
+
 function initVoice() {
   const voices = window.speechSynthesis.getVoices();
-  // 只保留美國 + 英國英文語音，最多30組
-  const usVoices = voices.filter(v => v.lang.startsWith('en-US')).slice(0, 20);
-  const gbVoices = voices.filter(v => v.lang.startsWith('en-GB')).slice(0, 10);
-  allEnVoices = [...usVoices, ...gbVoices];
-  if (!allEnVoices.length) return;
+  allEnVoices = voices; // keep reference for getSelectedVoice
 
-  const sel = document.getElementById('voice-select');
+  // Restore saved selection
   const saved = localStorage.getItem('ppt_voice_n88141052');
-  sel.innerHTML = '';
-
-  // Country labels（只顯示美國和英國）
-  const COUNTRY = {
-    'en-US': '🇺🇸 美式英語',
-    'en-GB': '🇬🇧 英式英語',
-  };
-
-  // Female name patterns (known Microsoft/Google voices)
-  const FEMALE_PAT = /\b(Jenny|Aria|Ana|Michelle|Monica|Sara|Sonia|Maisie|Libby|Abbie?|Annette|Darcy|Freya|Joanne|Kim|Natasha|Tina|Neerja|Zira|Susan|Catherine|Clara|Heera|Leah|Raveena|Priya|Abbi|Ava|Emma|Alice|Hazel|Olive|Layla|Jasmine|Willow|Molly|Pita|Rosa|Nia|Jane|Female)\b/i;
-
-  function guessGender(v) {
-    if (FEMALE_PAT.test(v.name)) return 'female';
-    if (/male/i.test(v.name) && !/female/i.test(v.name)) return 'male';
-    return 'male';
+  if (saved && document.getElementById('voice-select').querySelector(`option[value="${saved}"]`)) {
+    document.getElementById('voice-select').value = saved;
   }
 
-  function shortName(v) {
-    return v.name
-      .replace(/^Microsoft /, '').replace(/^Google /, '')
-      .replace(/ Online \(Natural\)$/, ' ★').replace(/ Desktop$/, '')
-      .replace(/ - .+$/, '').replace(/\s+\(.*\)$/, '');
-  }
-
-  // Build groups: { 'en-US__female': { label, voices[] }, ... }
-  const groups = {};
-  allEnVoices.forEach(v => {
-    const lang = v.lang.slice(0, 5);
-    const countryLabel = COUNTRY[lang] || '🌐 其他英語';
-    const gender = guessGender(v);
-    const key = `${lang}__${gender}`;
-    if (!groups[key]) {
-      groups[key] = {
-        label: `${countryLabel}  ${gender === 'female' ? '👩 女聲' : '👨 男聲'}`,
-        voices: [], lang, gender
-      };
-    }
-    groups[key].voices.push(v);
-  });
-
-  // Sort order: country priority then female before male
-  const LANG_ORDER = ['en-US','en-GB','en-AU','en-IN','en-CA','en-IE','en-NZ','en-SG','en-ZA'];
-  const sortedKeys = Object.keys(groups).sort((a, b) => {
-    const [la, ga] = a.split('__');
-    const [lb, gb] = b.split('__');
-    const li = LANG_ORDER.indexOf(la) === -1 ? 99 : LANG_ORDER.indexOf(la);
-    const lj = LANG_ORDER.indexOf(lb) === -1 ? 99 : LANG_ORDER.indexOf(lb);
-    if (li !== lj) return li - lj;
-    return (ga === 'female' ? 0 : 1) - (gb === 'female' ? 0 : 1);
-  });
-
-  sortedKeys.forEach(key => {
-    const g = groups[key];
-    const grp = document.createElement('optgroup');
-    grp.label = g.label;
-    g.voices.forEach(v => {
-      const opt = document.createElement('option');
-      opt.value = v.name;
-      const isNatural = /Natural|Enhanced|Premium|Neural/.test(v.name);
-      opt.textContent = (isNatural ? '★ ' : '') + shortName(v);
-      if (v.name === saved) opt.selected = true;
-      grp.appendChild(opt);
-    });
-    sel.appendChild(grp);
-  });
-
-  // Default: Jenny or first natural US female > any US > first
-  if (!saved || !allEnVoices.find(v => v.name === saved)) {
-    const preferred =
-      allEnVoices.find(v => /Jenny/i.test(v.name)) ||
-      allEnVoices.find(v => /Natural|Enhanced|Premium|Neural/.test(v.name) && v.lang.startsWith('en-US') && guessGender(v) === 'female') ||
-      allEnVoices.find(v => /Natural|Enhanced|Premium|Neural/.test(v.name) && v.lang.startsWith('en-US')) ||
-      allEnVoices.find(v => v.lang.startsWith('en-US')) ||
-      allEnVoices[0];
-    if (preferred) sel.value = preferred.name;
-  }
-
-  // Update hint
-  document.getElementById('voice-hint').textContent = `${allEnVoices.length} 種語音`;
-
-  // Show Edge hint if few voices
+  // Show Edge hint if natural voices not available
+  const hasNatural = voices.some(v => /Natural|Neural|Enhanced/.test(v.name));
   const isEdge = navigator.userAgent.includes('Edg/');
   document.getElementById('edge-hint').style.display =
-    (allEnVoices.length < 5 && !isEdge) ? 'flex' : 'none';
+    (!hasNatural && !isEdge) ? 'flex' : 'none';
 
-  sel.addEventListener('change', () => {
-    localStorage.setItem('ppt_voice_n88141052', sel.value);
-    const v = allEnVoices.find(x => x.name === sel.value);
-    if (v) showToast((guessGender(v) === 'female' ? '👩 ' : '👨 ') + shortName(v));
+  document.getElementById('voice-select').addEventListener('change', function() {
+    localStorage.setItem('ppt_voice_n88141052', this.value);
+    const labels = {
+      'us-female':'🇺🇸 美國女生','us-male':'🇺🇸 美國男生',
+      'gb-female':'🇬🇧 英國女生','gb-male':'🇬🇧 英國男生','tw':'🇹🇼 台灣腔'
+    };
+    showToast(labels[this.value] || this.value);
   });
 }
 
 function getSelectedVoice() {
-  const name = document.getElementById('voice-select').value;
-  return allEnVoices.find(v => v.name === name) || allEnVoices[0] || null;
+  const key = document.getElementById('voice-select').value || 'us-female';
+  const voices = window.speechSynthesis.getVoices();
+  const cfg = VOICE_MAP[key];
+  if (!cfg) return voices.find(v => v.lang.startsWith('en-US')) || null;
+  // Try each preferred name in order
+  for (const name of cfg.names) {
+    const v = voices.find(v => v.name.includes(name));
+    if (v) return v;
+  }
+  // Fallback: any voice with matching lang
+  return voices.find(v => v.lang.startsWith(cfg.lang))
+    || voices.find(v => v.lang.startsWith('en-US'))
+    || null;
 }
 
 function openInEdge() {
-  const path = window.location.href;
-  window.location.href = 'microsoft-edge:' + path;
+  window.location.href = 'microsoft-edge:' + window.location.href;
 }
 
 window.speechSynthesis.onvoiceschanged = initVoice;
