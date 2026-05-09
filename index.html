@@ -1459,10 +1459,8 @@ document.getElementById('sel-play-btn').addEventListener('click', () => {
 });
 document.getElementById('sel-close-btn').addEventListener('click', hideSelPopup);
 
-// ── GitHub Sync ──────────────────────────────────────────────────────────────
-const SYNC_RAW = 'https://raw.githubusercontent.com/adam7315/n88141052-practice/main/edits.json';
-const SYNC_API = 'https://api.github.com/repos/adam7315/n88141052-practice/contents/edits.json';
-const PAT_KEY  = 'github_pat_n88141052';
+// ── Cloud Sync (jsonblob — no token needed) ───────────────────────────────────
+const BLOB_API = 'https://jsonblob.com/api/jsonBlob/019e0bb9-45be-7d86-bb97-817d4ca2eb53';
 
 function getAllLocalEdits() {
   const edits = {};
@@ -1473,9 +1471,9 @@ function getAllLocalEdits() {
   return edits;
 }
 
-async function loadEditsFromGitHub() {
+async function loadEditsFromCloud() {
   try {
-    const res = await fetch(SYNC_RAW + '?_=' + Date.now());
+    const res = await fetch(BLOB_API);
     if (!res.ok) return;
     const data = await res.json();
     if (!data.edits) return;
@@ -1487,52 +1485,34 @@ async function loadEditsFromGitHub() {
   } catch(e) {}
 }
 
-async function saveEditsToGitHub() {
+async function saveEditsToCloud() {
   const btn = document.getElementById('btn-sync');
   btn.disabled = true; btn.textContent = '☁ 同步中…';
-
-  let pat = localStorage.getItem(PAT_KEY);
-  if (!pat) {
-    pat = prompt('請輸入 GitHub Personal Access Token（只需輸入一次）\n\nGitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)\n→ Generate new token → 勾選 repo → 複製貼上：');
-    if (!pat) { btn.disabled = false; btn.textContent = '☁ 儲存'; return; }
-    localStorage.setItem(PAT_KEY, pat.trim()); pat = pat.trim();
-  }
-
-  // Get current SHA + existing cloud edits for merge
-  let sha = null, cloudEdits = {};
   try {
-    const r = await fetch(SYNC_API, { headers: { Authorization: 'token ' + pat, Accept: 'application/vnd.github.v3+json' } });
-    if (r.ok) {
-      const d = await r.json(); sha = d.sha;
-      try { cloudEdits = JSON.parse(atob(d.content.replace(/\n/g,''))).edits || {}; } catch(e) {}
-    }
-  } catch(e) {}
+    // Read current cloud edits first, then merge (local wins)
+    let cloudEdits = {};
+    const getRes = await fetch(BLOB_API);
+    if (getRes.ok) { try { cloudEdits = (await getRes.json()).edits || {}; } catch(e) {} }
 
-  // Merge: cloud as base, local overrides (local is the latest edits)
-  const merged = Object.assign({}, cloudEdits, getAllLocalEdits());
-  const payload = JSON.stringify({ version: 1, lastUpdated: new Date().toISOString(), edits: merged }, null, 2);
-  const body = { message: 'Sync edits from ' + navigator.platform, content: btoa(unescape(encodeURIComponent(payload))) };
-  if (sha) body.sha = sha;
+    const merged = Object.assign({}, cloudEdits, getAllLocalEdits());
+    const payload = { version: 1, lastUpdated: new Date().toISOString(), edits: merged };
 
-  try {
-    const r = await fetch(SYNC_API, {
+    const putRes = await fetch(BLOB_API, {
       method: 'PUT',
-      headers: { Authorization: 'token ' + pat, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(payload)
     });
-    if (r.ok) {
+    if (putRes.ok) {
       showToast('✓ 同步完成！其他裝置重新整理即可套用');
-      btn.textContent = '✓ 已同步'; setTimeout(() => { btn.textContent = '☁ 儲存'; }, 3000);
-    } else if (r.status === 401) {
-      localStorage.removeItem(PAT_KEY); showToast('❌ Token 無效已清除，請重試'); btn.textContent = '☁ 儲存';
-    } else {
-      showToast('❌ 同步失敗 ' + r.status); btn.textContent = '☁ 儲存';
+      btn.textContent = '✓ 已同步'; setTimeout(() => { btn.textContent = '☁ 儲存'; btn.disabled = false; }, 3000);
+      return;
     }
-  } catch(e) { showToast('❌ 網路錯誤'); btn.textContent = '☁ 儲存'; }
-  btn.disabled = false;
+    showToast('❌ 同步失敗 ' + putRes.status);
+  } catch(e) { showToast('❌ 網路錯誤'); }
+  btn.textContent = '☁ 儲存'; btn.disabled = false;
 }
 
-document.getElementById('btn-sync').addEventListener('click', saveEditsToGitHub);
+document.getElementById('btn-sync').addEventListener('click', saveEditsToCloud);
 
 // Init
 loadProgress();
@@ -1542,8 +1522,8 @@ updateHeader();
 updateFooter();
 document.getElementById('slide-img').src = `slides_img/slide_${currentSlide + 1}.png`;
 
-// Auto-load cloud edits on startup (applies GitHub edits not yet in local)
-loadEditsFromGitHub();
+// Auto-load cloud edits on startup
+loadEditsFromCloud();
 
 // Keyboard hint
 setTimeout(() => showToast('← → 換頁　Space 播放　Enter 完成'), 500);
