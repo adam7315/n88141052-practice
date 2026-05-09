@@ -993,16 +993,16 @@ function retryInitVoice() {
 // 綁定 change 事件（只需一次）
 document.getElementById('voice-select').addEventListener('change', function() {
   localStorage.setItem('ppt_voice_n88141052', this.value);
-  showToast(shortVoiceName({ name: this.value }));
+  const matched = allEnVoices.find(v => v.name === this.value);
+  showToast(matched ? '✓ ' + shortVoiceName(matched) : shortVoiceName({ name: this.value }));
 });
 
 function getSelectedVoice() {
   const name = document.getElementById('voice-select').value;
-  const voices = window.speechSynthesis.getVoices();
-  return voices.find(v => v.name === name)
-    || voices.find(v => v.name.includes('Jenny'))
-    || voices.find(v => v.lang.startsWith('en-US'))
-    || null;
+  // Use the cached list from buildVoiceSelect; calling getVoices() again
+  // can return an empty or mismatched list on iOS/Android, causing silent fallback.
+  const voices = allEnVoices.length ? allEnVoices : window.speechSynthesis.getVoices();
+  return voices.find(v => v.name === name) || null;
 }
 
 function openInEdge() {
