@@ -198,6 +198,29 @@
     transform: translateY(-50%);
   }
   .sentence.heard::before { display: none; }
+  .sentence.edited {
+    border-color: var(--yellow);
+    border-style: dashed;
+  }
+  .sentence.edited::before { color: var(--yellow); }
+  .sentence.editing {
+    border-color: var(--accent) !important;
+    background: #1c2333 !important;
+    outline: none;
+    cursor: text;
+    user-select: text;
+    -webkit-user-select: text;
+    box-shadow: 0 0 0 3px rgba(88,166,255,0.25);
+  }
+  .sentence.editing::before, .sentence.editing::after { display: none !important; }
+  .edit-badge {
+    font-size: 9px;
+    color: var(--yellow);
+    position: absolute;
+    right: 10px;
+    top: 6px;
+    opacity: 0.8;
+  }
 
   /* Controls */
   #controls {
@@ -483,7 +506,10 @@
 
   <div id="script-panel">
     <div id="en-section">
-      <div class="en-label">English Script — 點擊句子可單獨播放</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="en-label" style="margin-bottom:0">English Script — 點擊播放 / 雙擊編輯</div>
+        <button id="btn-reset-edits" title="重設此頁所有編輯" style="background:none;border:none;color:var(--text-muted);font-size:11px;cursor:pointer;padding:2px 6px;border-radius:4px;display:none">↩ 重設</button>
+      </div>
       <div id="sentences-list"></div>
     </div>
 
@@ -899,19 +925,103 @@ function renderDots() {
 }
 
 // Render sentences
+// ── 編輯功能 ─────────────────────────────────────
+function editKey(si, idx) { return `ppt_edit_${si}_${idx}`; }
+
+function getSentenceText(si, idx) {
+  return localStorage.getItem(editKey(si, idx)) || SLIDES[si].en[idx];
+}
+
+function saveEditText(si, idx, text) {
+  const orig = SLIDES[si].en[idx];
+  if (text.trim() === '' || text.trim() === orig) {
+    localStorage.removeItem(editKey(si, idx));
+  } else {
+    localStorage.setItem(editKey(si, idx), text.trim());
+  }
+}
+
+function hasEditsOnSlide(si) {
+  return SLIDES[si].en.some((_, idx) => localStorage.getItem(editKey(si, idx)));
+}
+
+function startEditing(div, si, idx) {
+  if (div.classList.contains('editing')) return;
+  stopSpeech();
+  const original = getSentenceText(si, idx);
+  div.classList.add('editing');
+  div.contentEditable = 'true';
+  div.focus();
+  // Move cursor to end
+  const range = document.createRange();
+  range.selectNodeContents(div);
+  range.collapse(false);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+
+  function commit() {
+    if (!div.classList.contains('editing')) return;
+    div.contentEditable = 'false';
+    div.classList.remove('editing');
+    const newText = div.textContent.trim();
+    saveEditText(si, idx, newText);
+    div.textContent = getSentenceText(si, idx);
+    refreshEditState(div, si, idx);
+    updateResetBtn(si);
+  }
+  function cancel() {
+    div.contentEditable = 'false';
+    div.classList.remove('editing');
+    div.textContent = original;
+  }
+  div.addEventListener('blur', commit, { once: true });
+  div.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); div.blur(); }
+    if (e.key === 'Escape') { div.removeEventListener('blur', commit); cancel(); }
+  }, { once: true });
+}
+
+function refreshEditState(div, si, idx) {
+  const isEdited = !!localStorage.getItem(editKey(si, idx));
+  div.classList.toggle('edited', isEdited);
+  let badge = div.querySelector('.edit-badge');
+  if (isEdited) {
+    if (!badge) { badge = document.createElement('span'); badge.className = 'edit-badge'; div.appendChild(badge); }
+    badge.textContent = '✏';
+  } else if (badge) {
+    badge.remove();
+  }
+}
+
+function updateResetBtn(si) {
+  const btn = document.getElementById('btn-reset-edits');
+  if (btn) btn.style.display = hasEditsOnSlide(si) ? 'inline-block' : 'none';
+}
+
 function renderSentences() {
   heardSentences = [];
   const list = document.getElementById('sentences-list');
   list.innerHTML = '';
-  const data = SLIDES[currentSlide];
-  data.en.forEach((text, idx) => {
+  const si = currentSlide;
+  const data = SLIDES[si];
+  data.en.forEach((_, idx) => {
+    const text = getSentenceText(si, idx);
     const div = document.createElement('div');
     div.className = 'sentence';
     div.dataset.idx = idx;
     div.textContent = text;
-    div.addEventListener('click', () => speakSentence(idx));
+    refreshEditState(div, si, idx);
+    div.addEventListener('click', e => {
+      if (!div.classList.contains('editing')) speakSentence(idx);
+    });
+    div.addEventListener('dblclick', e => {
+      e.preventDefault();
+      startEditing(div, si, idx);
+    });
     list.appendChild(div);
   });
+  updateResetBtn(si);
   // Chinese
   const zhList = document.getElementById('zh-lines');
   zhList.innerHTML = '';
@@ -961,7 +1071,7 @@ function goToSlide(idx) {
 // Speak single sentence
 function speakSentence(idx) {
   stopSpeech();
-  const text = SLIDES[currentSlide].en[idx];
+  const text = getSentenceText(currentSlide, idx);
   const speed = parseFloat(document.getElementById('speed-select').value);
   const utter = new SpeechSynthesisUtterance(text);
   utter.rate = speed;
@@ -984,7 +1094,8 @@ function speakSentence(idx) {
 // Play all sentences
 function playAll(startIdx = 0) {
   stopSpeech();
-  const sentences = SLIDES[currentSlide].en;
+  const si = currentSlide;
+  const sentences = SLIDES[si].en.map((_, i) => getSentenceText(si, i));
   const speed = parseFloat(document.getElementById('speed-select').value);
   isPlaying = true;
   document.getElementById('btn-stop').disabled = false;
@@ -1094,6 +1205,12 @@ function celebrate() {
 // Event listeners
 document.getElementById('btn-play-all').addEventListener('click', () => playAll(0));
 document.getElementById('btn-stop').addEventListener('click', stopSpeech);
+document.getElementById('btn-reset-edits').addEventListener('click', () => {
+  if (!confirm('確定要重設此頁所有編輯？')) return;
+  SLIDES[currentSlide].en.forEach((_, idx) => localStorage.removeItem(editKey(currentSlide, idx)));
+  renderSentences();
+  showToast('已重設此頁所有編輯');
+});
 document.getElementById('btn-prev').addEventListener('click', () => goToSlide(currentSlide - 1));
 document.getElementById('btn-next').addEventListener('click', () => goToSlide(currentSlide + 1));
 document.getElementById('btn-done').addEventListener('click', markDone);
